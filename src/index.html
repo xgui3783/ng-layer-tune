@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Stencil Component Starter</title>
+
+    <script type="module" src="/build/ng-layer-tune.esm.js"></script>
+    <script nomodule src="/build/ng-layer-tune.js"></script>
+    <script src="main.bundle.js"></script>
+    <style>
+      html,
+      body,
+      .container {
+        height: 100%;
+        margin: 0;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+      }
+      .container {
+        display: grid; 
+        grid-auto-columns: 1fr; 
+        grid-template-rows: 12em auto; 
+        gap: 0px 0px; 
+      }
+      .neuroglancer-context-menu
+      {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <ng-layer-tune ng-layer-name="peanut"></ng-layer-tune>
+      <div id="neuroglancer-container"></div>
+    </div>
+  </body>
+  <script>
+  const layerId = 'peanut'
+  const _url = `https://neuroglancer.humanbrainproject.org/precomputed/WHS_SD_rat/templates/v1.01/t2star_masked`
+  const url = `https://neuroglancer.humanbrainproject.eu/precomputed/WHS_SD_rat/templates/v1.01/t2star_masked`
+  const darkTheme = true
+  const { scale } = { scale: 0.1 }
+  const backgrd = darkTheme
+    ? [0,0,0,1]
+    : [1,1,1,1]
+
+  const rmPsp = darkTheme
+    ? {"mode":"<","color":[0.1,0.1,0.1,1]}
+    :{"color":[1,1,1,1],"mode":"=="}
+  const drawSubstrates = darkTheme
+    ? {"color":[0.5,0.5,1,0.2]}
+    : {"color":[0,0,0.5,0.15]}
+  const drawZoomLevels = darkTheme
+    ? {"cutOff":150000 * scale }
+    : {"cutOff":200000 * scale,"color":[0.5,0,0,0.15] }
+    const config = {
+    "configName": "",
+    "globals": {
+      "hideNullImageValues": true,
+      "useNehubaLayout": {
+        "keepDefaultLayouts": false
+      },
+      "useNehubaMeshLayer": true,
+      "rightClickWithCtrlGlobal": false,
+      "zoomWithoutCtrlGlobal": false,
+      "useCustomSegmentColors": true
+    },
+    "zoomWithoutCtrl": true,
+    "hideNeuroglancerUI": true,
+    "rightClickWithCtrl": true,
+    "rotateAtViewCentre": true,
+    "enableMeshLoadingControl": true,
+    "zoomAtViewCentre": true,
+    // "restrictUserNavigation": true,
+    "dataset": {
+      "imageBackground": backgrd,
+      "initialNgState": {
+        "showDefaultAnnotations": false,
+        "layers": {
+          [layerId]: {
+            source: `precomputed://${url}`,
+            type: "image",
+            transform: [
+						[
+							1,
+							0,
+							0,
+							-9550781
+						],
+						[
+							0,
+							1,
+							0,
+							-24355468
+						],
+						[
+							0,
+							0,
+							1,
+							-9707031
+						],
+						[
+							0,
+							0,
+							0,
+							1
+						]
+					]
+          }
+        },
+        "navigation": {
+          "zoomFactor": 350000 * scale,
+        },
+        "perspectiveOrientation": [
+          0.3140767216682434,
+          -0.7418519854545593,
+          0.4988985061645508,
+          -0.3195493221282959
+        ],
+        "perspectiveZoom": 1922235.5293810747 * scale
+      }
+    },
+    "layout": {
+      "useNehubaPerspective": {
+        "perspectiveSlicesBackground": backgrd,
+        "removePerspectiveSlicesBackground": rmPsp,
+        "perspectiveBackground": backgrd,
+        "fixedZoomPerspectiveSlices": {
+          "sliceViewportWidth": 300,
+          "sliceViewportHeight": 300,
+          "sliceZoom": 563818.3562426177 * scale,
+          "sliceViewportSizeMultiplier": 2
+        },
+        "mesh": {
+          "backFaceColor": backgrd,
+          "removeBasedOnNavigation": true,
+          "flipRemovedOctant": true,
+          surfaceParcellation: false
+        },
+        "centerToOrigin": true,
+        "drawSubstrates": drawSubstrates,
+        "drawZoomLevels": drawZoomLevels,
+        "restrictZoomLevel": {
+          "minZoom": 1200000 * scale,
+          "maxZoom": 3500000 * scale
+        }
+      }
+    }
+  }
+  
+
+  const { LayerManager, UrlHashBinding } = export_nehuba.getNgPatchableObj()
+
+  UrlHashBinding.prototype.setUrlHash = () => {
+    // this.log.log('seturl hash')
+    // this.log.log('setting url hash')
+  }
+
+  UrlHashBinding.prototype.updateFromUrlHash = () => {
+    // this.log.log('update hash binding')
+  }
+
+
+  export_nehuba.createNehubaViewer(config, e => {
+    console.error(e)
+  })
+  
+  </script>
+</html>
