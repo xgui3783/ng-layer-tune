@@ -1,6 +1,6 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State } from '@stencil/core';
 import { EnumColorMapName, getShader } from '../../utils/colormaps';
-import { getDebouce, getLayer, verifyLayer } from '../../utils/utils';
+import { clamp, getDebouce, getLayer, verifyLayer } from '../../utils/utils';
 
 export type TErrorEvent = {
   message: string
@@ -17,6 +17,22 @@ export class NgLayerTune {
 
   @Prop()
   ngLayerName: string
+
+  @Prop()
+  thresholdMin: number = 0
+
+  @Prop()
+  thresholdMax: number = 1
+
+  @Prop()
+  advancedControl: boolean = false
+
+  @Watch('thresholdMin')
+  @Watch('thresholdMax')
+  onThresholdMinMaxChange(){
+    this.lowerThreshold = clamp(this.thresholdMin, this.thresholdMax, this.lowerThreshold)
+    this.higherThreshold = clamp(this.thresholdMin, this.thresholdMax, this.higherThreshold)
+  }
 
   @Event()
   errorEmitter: EventEmitter<TErrorEvent>
@@ -98,6 +114,7 @@ export class NgLayerTune {
 
   componentDidLoad(){
     this.coupleLayer()
+    this.onThresholdMinMaxChange()
   }
 
   private labelStyle = {
@@ -137,8 +154,8 @@ export class NgLayerTune {
       <Host>
         <form style={this.formStyle}>
           {getRangeInput({
-            min: 0,
-            max: 1,
+            min: this.thresholdMin,
+            max: this.thresholdMax,
             id: 'lower_threshold',
             title: 'Lower threshold',
             onInput: ev => this.lowerThreshold = Number((ev.target as any).value),
@@ -146,14 +163,14 @@ export class NgLayerTune {
           })}
 
           {getRangeInput({
-            min: 0,
-            max: 1,
+            min: this.thresholdMin,
+            max: this.thresholdMax,
             id: 'higher_threshold',
             title: 'Higher threshold',
             onInput: ev => this.higherThreshold = Number((ev.target as any).value),
             value: this.higherThreshold
           })}
-          {getRangeInput({
+          {this.advancedControl && getRangeInput({
             min: -1,
             max: 1,
             id: 'brightness',
@@ -161,7 +178,7 @@ export class NgLayerTune {
             onInput: ev => this.brightness = Number((ev.target as any).value),
             value: this.brightness
           })}
-          {getRangeInput({
+          {this.advancedControl && getRangeInput({
             min: -1,
             max: 1,
             id: 'contrast',

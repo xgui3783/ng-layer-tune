@@ -8,7 +8,10 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { TErrorEvent } from "./components/ng-layer-tune/ng-layer-tune";
 export namespace Components {
     interface NgLayerTune {
+        "advancedControl": boolean;
         "ngLayerName": string;
+        "thresholdMax": number;
+        "thresholdMin": number;
         "useNativeControl": boolean;
     }
 }
@@ -25,8 +28,11 @@ declare global {
 }
 declare namespace LocalJSX {
     interface NgLayerTune {
+        "advancedControl"?: boolean;
         "ngLayerName"?: string;
         "onErrorEmitter"?: (event: CustomEvent<TErrorEvent>) => void;
+        "thresholdMax"?: number;
+        "thresholdMin"?: number;
         "useNativeControl"?: boolean;
     }
     interface IntrinsicElements {

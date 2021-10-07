@@ -4,6 +4,12 @@ type TDebounceConfig = {
   trailing?: boolean
 }
 
+export function clamp(lower: number, higher: number, val: number) {
+  if (val < lower) return lower
+  if (val > higher) return higher
+  return val
+} 
+
 export function getDebouce(opts: TDebounceConfig) {
   
   const { duration, leading = false, trailing = true } = opts
