@@ -223,7 +223,6 @@ export const getShader = (cfg: TGetShaderCfg): string => {
     removeBg = false,
     hideZero = false
   } = cfg
-  console.log({removeBg})
   const { header, main, premain } = mapKeyColorMap.get(colormap) || (() => {
     console.warn(`colormap ${colormap} not found. Using default colormap instead`)
     return mapKeyColorMap.get(EnumColorMapName.GREYSCALE)

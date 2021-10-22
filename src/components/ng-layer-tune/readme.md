@@ -10,6 +10,8 @@
 | Property           | Attribute            | Description | Type      | Default     |
 | ------------------ | -------------------- | ----------- | --------- | ----------- |
 | `advancedControl`  | `advanced-control`   |             | `boolean` | `false`     |
+| `hideBackground`   | `hide-background`    |             | `boolean` | `false`     |
+| `hideZeroValue`    | `hide-zero-value`    |             | `boolean` | `false`     |
 | `ngLayerName`      | `ng-layer-name`      |             | `string`  | `undefined` |
 | `thresholdMax`     | `threshold-max`      |             | `number`  | `1`         |
 | `thresholdMin`     | `threshold-min`      |             | `number`  | `0`         |
