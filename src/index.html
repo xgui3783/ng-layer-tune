@@ -31,6 +31,7 @@
   <body>
     <div class="container">
       <ng-layer-tune ng-layer-name="peanut"
+        advanced-control="true"
         threshold-min="0.02"
         threshold-max="2"></ng-layer-tune>
       <div id="neuroglancer-container"></div>
@@ -43,7 +44,7 @@
   const darkTheme = true
   const { scale } = { scale: 0.1 }
   const backgrd = darkTheme
-    ? [0,0,0,1]
+    ? [0.2,0.2,0.2,1]
     : [1,1,1,1]
 
   const rmPsp = darkTheme

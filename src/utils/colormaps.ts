@@ -210,6 +210,7 @@ type TGetShaderCfg = {
   brightness: number
   contrast: number
   removeBg: boolean
+  hideZero: boolean
 }
 
 export const getShader = (cfg: TGetShaderCfg): string => {
@@ -219,8 +220,10 @@ export const getShader = (cfg: TGetShaderCfg): string => {
     highThreshold = 1,
     brightness = 0,
     contrast = 0,
-    removeBg = false
+    removeBg = false,
+    hideZero = false
   } = cfg
+  console.log({removeBg})
   const { header, main, premain } = mapKeyColorMap.get(colormap) || (() => {
     console.warn(`colormap ${colormap} not found. Using default colormap instead`)
     return mapKeyColorMap.get(EnumColorMapName.GREYSCALE)
@@ -232,6 +235,7 @@ export const getShader = (cfg: TGetShaderCfg): string => {
 ${premain}
 void main() {
   float raw_x = toNormalized(getDataValue());
+  ${hideZero ? 'if(x==0.0){emitTransparent();}' : ''}
   float x = (raw_x - ${_lowThreshold.toFixed(10)}) / (${highThreshold - _lowThreshold}) ${ brightness > 0 ? '+' : '-' } ${Math.abs(brightness).toFixed(10)};
 
   ${ removeBg ? 'if(x>1.0){emitTransparent();}else if(x<0.0){emitTransparent();}else{' : '' }

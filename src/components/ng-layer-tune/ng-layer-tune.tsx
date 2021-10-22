@@ -27,6 +27,22 @@ export class NgLayerTune {
   @Prop()
   advancedControl: boolean = false
 
+  @Prop()
+  hideBackground: boolean = false
+
+  @Prop()
+  hideZeroValue: boolean = false
+
+  @Watch('hideBackground')
+  setBg(){
+    this.hideBg = this.hideBackground
+  }
+
+  @Watch('hideZeroValue')
+  setZeroVal(){
+    this.hideZero = this.hideZeroValue
+  }
+
   @Watch('thresholdMin')
   @Watch('thresholdMax')
   onThresholdMinMaxChange(){
@@ -53,12 +69,18 @@ export class NgLayerTune {
   higherThreshold: number = 1
   @State()
   selectedShader: any
+  @State()
+  hideBg: boolean = false
+  @State()
+  hideZero: boolean = false
 
   @Watch('lowerThreshold')
   @Watch('higherThreshold')
   @Watch('brightness')
   @Watch('contrast')
   @Watch('selectedShader')
+  @Watch('hideBg')
+  @Watch('hideZero')
   refreshShader(){
     this.debounce(() => {
       const shader = getShader({
@@ -67,7 +89,8 @@ export class NgLayerTune {
         colormap: this.selectedShader,
         brightness: this.brightness,
         contrast: this.contrast,
-        removeBg: true
+        removeBg: this.hideBg,
+        hideZero: this.hideZero
       })
       this.shaderCode = shader
       this.layerObj.layer.fragmentMain.restoreState(shader)
@@ -112,7 +135,7 @@ export class NgLayerTune {
     this.coupleLayer()
   }
 
-  componentDidLoad(){
+  componentWillLoad(){
     this.coupleLayer()
     this.onThresholdMinMaxChange()
   }
@@ -148,6 +171,22 @@ export class NgLayerTune {
         <span>
           {value}
         </span>
+      ]
+    }
+    const getCheckBox = (opts: { id: string, title: string, checked: boolean, onInput: (ev: Event) => void }) => {
+      const {
+        id,
+        title,
+        checked,
+        onInput
+      } = opts
+      return [
+        <label style={this.labelStyle} htmlfor={id}>{title}</label>,
+        <input type="checkbox"
+          id={id}
+          name={id}
+          checked={checked}
+          onInput={ev => onInput(ev)}/>
       ]
     }
     return (
@@ -186,7 +225,6 @@ export class NgLayerTune {
             onInput: ev => this.contrast = Number((ev.target as any).value),
             value: this.contrast
           })}
-          
           <label style={this.labelStyle} htmlFor="colormap">Color map</label>
           <select name="colormap" id="colormap" onInput={val => this.selectedShader = (val.target as any).value}>
             <option value="">--Please select a color map--</option>
@@ -197,6 +235,23 @@ export class NgLayerTune {
             }
           </select>
           <span></span>
+
+          {getCheckBox({
+            id: 'hide-threshold-checkbox',
+            onInput: ev => this.hideBg = (ev.target as any).checked,
+            checked: this.hideBg,
+            title: 'Hide clamped'
+          })}
+          <span></span>
+
+          {this.advancedControl && getCheckBox({
+            id: 'hide-zero-value-checkbox',
+            onInput: ev => this.hideZero = (ev.target as any).checked,
+            checked: this.hideZero,
+            title: 'Hide zero'
+          })}
+          <span></span>
+          
         </form>
       </Host>
     );
