@@ -31,6 +31,7 @@
   <body>
     <div class="container">
       <ng-layer-tune ng-layer-name="peanut"
+        hide-ctrl="lower_threshold,higher_threshold,brightness,contrast,colormap,hide-threshold-checkbox,hide-zero-value-checkbox"
         advanced-control="true"
         threshold-min="0.02"
         threshold-max="2"></ng-layer-tune>
@@ -80,35 +81,15 @@
       "initialNgState": {
         "showDefaultAnnotations": false,
         "layers": {
+          'colin': {
+            source: `precomputed://https://neuroglancer.humanbrainproject.eu/precomputed/JuBrain/v2.2c/colin27_seg`,
+            type: 'image',
+            transform: [[1,0,0,-75500000],[0,1,0,-111500000],[0,0,1,-67500000],[0,0,0,1]]
+          },
           [layerId]: {
             source: `precomputed://${url}`,
             type: "image",
-            transform: [
-						[
-							1,
-							0,
-							0,
-							-9550781
-						],
-						[
-							0,
-							1,
-							0,
-							-24355468
-						],
-						[
-							0,
-							0,
-							1,
-							-9707031
-						],
-						[
-							0,
-							0,
-							0,
-							1
-						]
-					]
+            transform: [[1,0,0,-9550781],[0,1,0,-24355468],[0,0,1,-9707031],[0,0,0,1]]
           }
         },
         "navigation": {

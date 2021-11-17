@@ -13,6 +13,20 @@ export type TErrorEvent = {
 export class NgLayerTune {
 
   @Prop()
+  /**
+   * comma-separate controls to hide
+   */
+  hideCtrl: string = ''
+
+  @State()
+  hideCtrlList: string[] = []
+
+  @Watch('hideCtrl')
+  updateHideCtrlList(){
+    this.hideCtrlList = this.hideCtrl.split(',')
+  }
+
+  @Prop()
   useNativeControl: boolean = false
 
   @Prop()
@@ -58,6 +72,14 @@ export class NgLayerTune {
     leading: false,
     trailing: true
   })
+
+  @State()
+  opacity: number
+
+  @Watch('opacity')
+  updateOpacity(){
+    this.layerObj.layer.opacity.restoreState(this.opacity)
+  }
 
   @State()
   brightness: number = 0
@@ -138,6 +160,7 @@ export class NgLayerTune {
   componentWillLoad(){
     this.coupleLayer()
     this.onThresholdMinMaxChange()
+    this.updateHideCtrlList()
   }
 
   private labelStyle = {
@@ -157,6 +180,7 @@ export class NgLayerTune {
       const {
         min, max, title, id, value, onInput
       } = opts
+      if (this.hideCtrlList.includes(id)) return []
       return [
         <label style={this.labelStyle} htmlFor={id}>{title}</label>,
         <input
@@ -180,18 +204,28 @@ export class NgLayerTune {
         checked,
         onInput
       } = opts
+      if (this.hideCtrlList.includes(id)) return []
       return [
         <label style={this.labelStyle} htmlfor={id}>{title}</label>,
         <input type="checkbox"
           id={id}
           name={id}
           checked={checked}
-          onInput={ev => onInput(ev)}/>
+          onInput={ev => onInput(ev)}/>,
+        <span></span>
       ]
     }
     return (
       <Host>
         <form style={this.formStyle}>
+          {getRangeInput({
+            min: 0,
+            max: 1,
+            id: 'opacity',
+            title: 'Opacity',
+            onInput: ev => this.opacity = Number((ev.target as any).value),
+            value: 0.5
+          })}
           {getRangeInput({
             min: this.thresholdMin,
             max: this.thresholdMax,
@@ -225,16 +259,20 @@ export class NgLayerTune {
             onInput: ev => this.contrast = Number((ev.target as any).value),
             value: this.contrast
           })}
-          <label style={this.labelStyle} htmlFor="colormap">Color map</label>
-          <select name="colormap" id="colormap" onInput={val => this.selectedShader = (val.target as any).value}>
-            <option value="">--Please select a color map--</option>
-            {
-              this.colorMapNames.map(name => (
-                <option value={name}>{name}</option>
-              ))
-            }
-          </select>
-          <span></span>
+          {this.hideCtrlList.includes('colormap')
+            ? []
+            : [
+              <label style={this.labelStyle} htmlFor="colormap">Color map</label>,
+              <select name="colormap" id="colormap" onInput={val => this.selectedShader = (val.target as any).value}>
+                <option value="">--Please select a color map--</option>
+                {
+                  this.colorMapNames.map(name => (
+                    <option value={name}>{name}</option>
+                  ))
+                }
+              </select>,
+              <span></span>
+            ]}
 
           {getCheckBox({
             id: 'hide-threshold-checkbox',
@@ -242,7 +280,6 @@ export class NgLayerTune {
             checked: this.hideBg,
             title: 'Hide clamped'
           })}
-          <span></span>
 
           {this.advancedControl && getCheckBox({
             id: 'hide-zero-value-checkbox',
@@ -250,7 +287,6 @@ export class NgLayerTune {
             checked: this.hideZero,
             title: 'Hide zero'
           })}
-          <span></span>
           
         </form>
       </Host>

@@ -10,6 +10,7 @@ export namespace Components {
     interface NgLayerTune {
         "advancedControl": boolean;
         "hideBackground": boolean;
+        "hideCtrl": string;
         "hideZeroValue": boolean;
         "ngLayerName": string;
         "thresholdMax": number;
@@ -32,6 +33,7 @@ declare namespace LocalJSX {
     interface NgLayerTune {
         "advancedControl"?: boolean;
         "hideBackground"?: boolean;
+        "hideCtrl"?: string;
         "hideZeroValue"?: boolean;
         "ngLayerName"?: string;
         "onErrorEmitter"?: (event: CustomEvent<TErrorEvent>) => void;
