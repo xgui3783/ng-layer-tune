@@ -74,7 +74,7 @@ export class NgLayerTune {
   })
 
   @State()
-  opacity: number
+  opacity: number = 0.5
 
   @Watch('opacity')
   updateOpacity(){
@@ -224,7 +224,7 @@ export class NgLayerTune {
             id: 'opacity',
             title: 'Opacity',
             onInput: ev => this.opacity = Number((ev.target as any).value),
-            value: 0.5
+            value: this.opacity
           })}
           {getRangeInput({
             min: this.thresholdMin,
