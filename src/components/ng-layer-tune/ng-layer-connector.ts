@@ -139,9 +139,32 @@ export class IFrameNgLayerConnector implements NgLayerInterface {
     ])
   }
 
+  onDestroyHook(){
+    this.postMessage({
+      method: `sxplr.exit`,
+      params: {
+        requests: [
+          {
+            id: getUuid(),
+            jsonrpc: '2.0',
+            method: `sxplr.removeLayers`,
+            params: {
+              layers: [
+                {
+                  id: this.ngLayerName
+                }
+              ]
+            }
+          }
+        ] // any remaining requests to be carried out
+      }
+    })
+  }
+
   async init() {
     await this.handshake()
     await this.loadIframeLayer(this.updateId)
+    window.addEventListener('pagehide', () => this.onDestroyHook(), { once: true })
     this.connected = true
   }
 
