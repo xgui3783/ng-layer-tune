@@ -19,7 +19,7 @@
       .container {
         display: grid; 
         grid-auto-columns: 1fr; 
-        grid-template-rows: 12em auto; 
+        grid-template-rows: 1rem 12em auto; 
         gap: 0px 0px; 
       }
       .neuroglancer-context-menu
@@ -30,8 +30,15 @@
   </head>
   <body>
     <div class="container">
+      <div>
+        <span>
+          ng-layer-tune: a widget that controls a neuroglancer image layer. 
+        </span>
+        <a href="https://github.com/xgui3783/ng-layer-tune">github</a>
+      </div>
+      <!-- add this property to hide controls  -->
+      <!-- hide-ctrl="lower_threshold,higher_threshold,brightness,contrast,colormap,hide-threshold-checkbox,hide-zero-value-checkbox" -->
       <ng-layer-tune ng-layer-name="peanut"
-        hide-ctrl="lower_threshold,higher_threshold,brightness,contrast,colormap,hide-threshold-checkbox,hide-zero-value-checkbox"
         advanced-control="true"
         threshold-min="0.02"
         threshold-max="2"></ng-layer-tune>

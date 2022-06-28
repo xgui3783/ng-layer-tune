@@ -19,12 +19,17 @@ export const config: Config = {
     {
       type: 'www',
       serviceWorker: null, // disable service workers
-    },    {
+    },
+    {
       type: 'www',
       copy: [
         {
           src: '../node_modules/export-nehuba/dist/min/*.js',
           dest: './'
+        },
+        {
+          src: '../src/plugin.html',
+          dest: './plugin.html'
         }
       ]
     }

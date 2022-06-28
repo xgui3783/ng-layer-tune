@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script type="module" src="/build/ng-layer-tune.esm.js"></script>
+    <script nomodule src="/build/ng-layer-tune.js"></script>
+</head>
+<body>
+    <ng-layer-tune ng-layer-name="peanut2"
+        use-iframe-ctrl="true"
+        advanced-control="true"
+        threshold-min="0.02"
+        threshold-max="2"></ng-layer-tune>
+</body>
+<script>
+    const controller = document.querySelector('ng-layer-tune')
+    controller.iframeLayerSpec = {"source":"https://neuroglancer.humanbrainproject.eu/precomputed/WHS_SD_rat/templates/v1.01/t2star_masked","transform":[[1,0,0,-9550781],[0,1,0,-24355468],[0,0,1,-9707031],[0,0,0,1]]}
+</script>
+</html>

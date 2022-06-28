@@ -5,6 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { NgLayerSpec } from "./components/ng-layer-tune/ng-layer-connector";
 import { TErrorEvent } from "./components/ng-layer-tune/ng-layer-tune";
 export namespace Components {
     interface NgLayerTune {
@@ -12,9 +13,13 @@ export namespace Components {
         "hideBackground": boolean;
         "hideCtrl": string;
         "hideZeroValue": boolean;
+        "iFrameName": string;
+        "iframeLayerSpec": NgLayerSpec;
+        "initialOpacity": number;
         "ngLayerName": string;
         "thresholdMax": number;
         "thresholdMin": number;
+        "useIframeCtrl": boolean;
         "useNativeControl": boolean;
     }
 }
@@ -35,10 +40,14 @@ declare namespace LocalJSX {
         "hideBackground"?: boolean;
         "hideCtrl"?: string;
         "hideZeroValue"?: boolean;
+        "iFrameName"?: string;
+        "iframeLayerSpec"?: NgLayerSpec;
+        "initialOpacity"?: number;
         "ngLayerName"?: string;
         "onErrorEmitter"?: (event: CustomEvent<TErrorEvent>) => void;
         "thresholdMax"?: number;
         "thresholdMin"?: number;
+        "useIframeCtrl"?: boolean;
         "useNativeControl"?: boolean;
     }
     interface IntrinsicElements {

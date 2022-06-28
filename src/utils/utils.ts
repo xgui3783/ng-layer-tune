@@ -4,6 +4,12 @@ type TDebounceConfig = {
   trailing?: boolean
 }
 
+let uuidCounter = 1
+export function getUuid(){
+  uuidCounter ++
+  return uuidCounter.toString()
+}
+
 export function clamp(lower: number, higher: number, val: number) {
   if (val < lower) return lower
   if (val > higher) return higher
@@ -60,34 +66,4 @@ export async function retry(fn: () => Promise<any>, opts?: TRetryConfig){
     }
   }
   throw new Error(`[retry] fn failed ${retries} times. Aborting.`)
-}
-
-type TGetLayer = {
-  viewerObj?: any
-  layerName: string
-}
-
-export async function getLayer(spec: TGetLayer){
-  const {
-    viewerObj,
-    layerName,
-  } = spec
-  const viewer = (viewerObj || (window as any).viewer)
-  return await retry(async () => {
-    const layerObj = viewer.layerManager.getLayerByName(layerName)
-    if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
-    return layerObj
-  }, {
-    retries: 10,
-    timeout: 16,
-  })
-}
-
-export async function verifyLayer(layerObj: any) {
-  const type = layerObj?.initialSpecification?.type
-  if (type === 'segmentation') throw new Error(`layer is a segmentation. Colormap will not work.`)
-  if (type === 'image') return null
-  return {
-    message: `layer.initialSpecification.type not defined. Component may not funciton properly.`
-  }
 }

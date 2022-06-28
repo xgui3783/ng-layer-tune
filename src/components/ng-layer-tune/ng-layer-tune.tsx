@@ -1,6 +1,7 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State } from '@stencil/core';
 import { EnumColorMapName, getShader } from '../../utils/colormaps';
-import { clamp, getDebouce, getLayer, verifyLayer } from '../../utils/utils';
+import { clamp, getDebouce } from '../../utils/utils';
+import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec } from "./ng-layer-connector"
 
 export type TErrorEvent = {
   message: string
@@ -11,6 +12,20 @@ export type TErrorEvent = {
   styleUrl: 'ng-layer-tune.css',
 })
 export class NgLayerTune {
+
+  private connector: NgLayerInterface
+
+  @Prop()
+  /**
+   * used for postMessage communication with siibra-explorer
+   */
+  useIframeCtrl: boolean = false
+
+  @Prop()
+  iframeLayerSpec: NgLayerSpec
+
+  @Prop()
+  iFrameName: string = 'ng-layer-tune'
 
   @Prop()
   /**
@@ -47,6 +62,9 @@ export class NgLayerTune {
   @Prop()
   hideZeroValue: boolean = false
 
+  @Prop()
+  initialOpacity: number = null
+
   @Watch('hideBackground')
   setBg(){
     this.hideBg = this.hideBackground
@@ -78,7 +96,7 @@ export class NgLayerTune {
 
   @Watch('opacity')
   updateOpacity(){
-    this.layerObj.layer.opacity.restoreState(this.opacity)
+    if (this.connector?.connected) this.connector.setOpacity(this.opacity)
   }
 
   @State()
@@ -115,8 +133,7 @@ export class NgLayerTune {
         hideZero: this.hideZero
       })
       this.shaderCode = shader
-      this.layerObj.layer.fragmentMain.restoreState(shader)
-      
+      if (this.connector?.connected) this.connector.setShader(shader)
     })
   }
 
@@ -134,30 +151,30 @@ export class NgLayerTune {
     EnumColorMapName.JET,
   ]
 
-  private layerObj: any
   private async coupleLayer(){
-    if (this.ngLayerName) {
-      const layerObj = await getLayer({ layerName: this.ngLayerName })
-      try {
-        const warning = await verifyLayer(layerObj)
-        if (warning) {
-          this.errorEmitter.emit(warning)
-        }
-        this.layerObj = layerObj
-      } catch (e) {
-        this.errorEmitter.emit({
-          message: `Error: ${e.toString()}`
-        })
-      }
+    if (!this.ngLayerName) return
+    if (!this.useIframeCtrl) {
+      this.connector = new IntraFrameNglayerConnector(this.ngLayerName)
+      await this.connector.init()
+      return
     }
+    if (!this.iframeLayerSpec) return
+    this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
+    await this.connector.init()
+    this.connector.setOpacity(this.opacity)
+    this.connector.setShader(this.shaderCode)
   }
 
   @Watch('ngLayerName')
+  @Watch('iframeLayerSpec')
   ngLayerNamePropChanged(){
     this.coupleLayer()
   }
 
   componentWillLoad(){
+    if (this.initialOpacity !== null) {
+      this.opacity = this.initialOpacity
+    }
     this.coupleLayer()
     this.onThresholdMinMaxChange()
     this.updateHideCtrlList()

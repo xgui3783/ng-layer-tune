@@ -11,7 +11,9 @@
 | ------------------ | -------------------- | ----------- | --------- | ----------- |
 | `advancedControl`  | `advanced-control`   |             | `boolean` | `false`     |
 | `hideBackground`   | `hide-background`    |             | `boolean` | `false`     |
+| `hideCtrl`         | `hide-ctrl`          |             | `string`  | `''`        |
 | `hideZeroValue`    | `hide-zero-value`    |             | `boolean` | `false`     |
+| `initialOpacity`   | `initial-opacity`    |             | `number`  | `null`      |
 | `ngLayerName`      | `ng-layer-name`      |             | `string`  | `undefined` |
 | `thresholdMax`     | `threshold-max`      |             | `number`  | `1`         |
 | `thresholdMin`     | `threshold-min`      |             | `number`  | `0`         |
