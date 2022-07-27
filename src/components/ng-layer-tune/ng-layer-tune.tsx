@@ -149,6 +149,8 @@ export class NgLayerTune {
     EnumColorMapName.GREYSCALE,
     
     EnumColorMapName.JET,
+
+    EnumColorMapName.RGB,
   ]
 
   private async coupleLayer(){

@@ -17,6 +17,8 @@ export enum EnumColorMapName{
   INFERNO='inferno',
 
   GREYSCALE='greyscale',
+
+  RGB='rgb (3 channel)'
 }
 
 interface IColorMap{
@@ -40,6 +42,11 @@ interface IColorMap{
    * vec3 rgb;
    */
   main: string
+
+  /**
+   * overwrite colormap
+   */
+  override?: (cfg: Omit<TGetShaderCfg, 'colormap'>) => string
 }
 
 const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
@@ -199,6 +206,28 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     header: COLORMAP_IS_GREYSCALE,
     premain: '',
     main: 'rgb=vec3(x, x, x);'
+  } ],
+
+  [ EnumColorMapName.RGB, {
+    header: '',
+    main: '',
+    premain: '',
+    override(cfg) {
+      /**
+       * hideZero has no effect
+       */
+      const { brightness, contrast, highThreshold, lowThreshold, removeBg } = cfg
+      const _lowThreshold = lowThreshold + 1e-10
+      const getChan = (variable: string, idx: number) => `float ${variable} = ( toNormalized(getDataValue( ${idx} )) - ${_lowThreshold.toFixed(10)} ) / ( ${ highThreshold - _lowThreshold } ) ${ brightness > 0 ? '+' : '-' } ${Math.abs(brightness).toFixed(10)};`
+      return `void main() {
+        ${getChan('r', 0)}
+        ${getChan('g', 1)}
+        ${getChan('b', 2)}
+        ${ removeBg ? 'if (r < 0.01 && g < 0.01 && b < 0.01 ) { emitTransparent(); } else {' : '' }
+        emitRGB(vec3(r, g, b) * exp(${contrast.toFixed(10)}));
+        ${ removeBg ? '}' : '' }
+      }`
+    }
   } ]
 ])
 
@@ -223,10 +252,13 @@ export const getShader = (cfg: TGetShaderCfg): string => {
     removeBg = false,
     hideZero = false
   } = cfg
-  const { header, main, premain } = mapKeyColorMap.get(colormap) || (() => {
+  const { header, main, premain, override } = mapKeyColorMap.get(colormap) || (() => {
     console.warn(`colormap ${colormap} not found. Using default colormap instead`)
     return mapKeyColorMap.get(EnumColorMapName.GREYSCALE)
   })()
+  if (!!override) {
+    return override({ lowThreshold, highThreshold, brightness, contrast, removeBg, hideZero })
+  }
 
   // so that if lowthreshold is defined to be 0, at least some background removal will be done
   const _lowThreshold = lowThreshold + 1e-10
