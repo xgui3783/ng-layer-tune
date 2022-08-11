@@ -33,9 +33,9 @@ async function getLayer(spec: TGetLayer) {
 }
 
 export async function verifyLayer(layerObj: any) {
-  const type = layerObj?.initialSpecification?.type
-  if (type === 'segmentation') throw new Error(`layer is a segmentation. Colormap will not work.`)
-  if (type === 'image') return null
+  if (!!layerObj?.layer?.fragmentMain) {
+    return null
+  }
   return {
     message: `layer.initialSpecification.type not defined. Component may not funciton properly.`
   }
