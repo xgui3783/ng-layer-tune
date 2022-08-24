@@ -1,4 +1,4 @@
-import { Component, Host, h, Prop, Watch, EventEmitter, Event, State } from '@stencil/core';
+import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
 import { EnumColorMapName, getShader } from '../../utils/colormaps';
 import { clamp, getDebouce } from '../../utils/utils';
 import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec } from "./ng-layer-connector"
@@ -113,6 +113,13 @@ export class NgLayerTune {
   hideBg: boolean = false
   @State()
   hideZero: boolean = false
+
+
+  @Method()
+  async forceRefreshShader() {
+    console.log('refresh shader!')
+    this.refreshShader()
+  }
 
   @Watch('lowerThreshold')
   @Watch('higherThreshold')

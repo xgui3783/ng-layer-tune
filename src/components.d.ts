@@ -10,6 +10,7 @@ import { TErrorEvent } from "./components/ng-layer-tune/ng-layer-tune";
 export namespace Components {
     interface NgLayerTune {
         "advancedControl": boolean;
+        "forceRefreshShader": () => Promise<void>;
         "hideBackground": boolean;
         "hideCtrl": string;
         "hideZeroValue": boolean;
