@@ -3,6 +3,7 @@ import { retry, getUuid } from "../../utils/utils"
 type TGetLayer = {
   viewerObj?: any
   layerName: string
+  nehubaName?: string
 }
 
 type PartialNgLayer = {
@@ -20,10 +21,19 @@ async function getLayer(spec: TGetLayer) {
   const {
     viewerObj,
     layerName,
+    nehubaName
   } = spec
   const viewer = (viewerObj || (window as any).viewer)
+
+  let nehuba  
+
+  await new Promise((rs)=>setTimeout(() => {
+    nehuba = nehubaName && (window as any)[nehubaName]? (window as any)[nehubaName].ngviewer : viewer
+    rs('OK');
+  }, 1000)); 
+
   return await retry(async () => {
-    const layerObj = viewer.layerManager.getLayerByName(layerName)
+    const layerObj = nehuba.layerManager.getLayerByName(layerName)
     if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
     return layerObj
   }, {
@@ -53,12 +63,12 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
   private ngLayer: PartialNgLayer
   public connected = false
 
-  constructor(private ngLayerName: string) {
+  constructor(private ngLayerName: string, private nehubaName?: string) {
 
   }
   async init(){
-
-    const layerObj = await getLayer({ layerName: this.ngLayerName })
+    // const layerObj = await getLayer({ layerName: this.ngLayerName, nehubaName: this.nehubaName || null });
+    const layerObj = await getLayer({ layerName: this.ngLayerName, nehubaName: this.nehubaName || null });
     const warning = await verifyLayer(layerObj)
     if (warning) {
       throw new Error(warning.message)

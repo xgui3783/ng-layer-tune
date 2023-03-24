@@ -17,6 +17,7 @@ export namespace Components {
         "iFrameName": string;
         "iframeLayerSpec": NgLayerSpec;
         "initialOpacity": number;
+        "nehubaName": string;
         "ngLayerName": string;
         "thresholdMax": number;
         "thresholdMin": number;
@@ -44,6 +45,7 @@ declare namespace LocalJSX {
         "iFrameName"?: string;
         "iframeLayerSpec"?: NgLayerSpec;
         "initialOpacity"?: number;
+        "nehubaName"?: string;
         "ngLayerName"?: string;
         "onErrorEmitter"?: (event: CustomEvent<TErrorEvent>) => void;
         "thresholdMax"?: number;

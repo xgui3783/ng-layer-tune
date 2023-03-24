@@ -16,6 +16,7 @@
 | `iFrameName`       | `i-frame-name`       |             | `string`      | `'ng-layer-tune'` |
 | `iframeLayerSpec`  | --                   |             | `NgLayerSpec` | `undefined`       |
 | `initialOpacity`   | `initial-opacity`    |             | `number`      | `null`            |
+| `nehubaName`       | `nehuba-name`        |             | `string`      | `undefined`       |
 | `ngLayerName`      | `ng-layer-name`      |             | `string`      | `undefined`       |
 | `thresholdMax`     | `threshold-max`      |             | `number`      | `1`               |
 | `thresholdMin`     | `threshold-min`      |             | `number`      | `0`               |
@@ -28,6 +29,19 @@
 | Event          | Description | Type                                |
 | -------------- | ----------- | ----------------------------------- |
 | `errorEmitter` |             | `CustomEvent<{ message: string; }>` |
+
+
+## Methods
+
+### `forceRefreshShader() => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
 
 
 ----------------------------------------------
