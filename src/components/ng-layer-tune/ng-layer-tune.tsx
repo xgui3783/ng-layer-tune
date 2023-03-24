@@ -45,6 +45,9 @@ export class NgLayerTune {
   useNativeControl: boolean = false
 
   @Prop()
+  viewerVariableName: string
+
+  @Prop()
   ngLayerName: string
 
   @Prop()
@@ -163,7 +166,7 @@ export class NgLayerTune {
   private async coupleLayer(){
     if (!this.ngLayerName) return
     if (!this.useIframeCtrl) {
-      this.connector = new IntraFrameNglayerConnector(this.ngLayerName)
+      this.connector = new IntraFrameNglayerConnector(this.ngLayerName, this.viewerVariableName)
       await this.connector.init()
       return
     }

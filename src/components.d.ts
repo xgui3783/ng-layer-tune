@@ -22,6 +22,7 @@ export namespace Components {
         "thresholdMin": number;
         "useIframeCtrl": boolean;
         "useNativeControl": boolean;
+        "viewerVariableName": string;
     }
 }
 declare global {
@@ -50,6 +51,7 @@ declare namespace LocalJSX {
         "thresholdMin"?: number;
         "useIframeCtrl"?: boolean;
         "useNativeControl"?: boolean;
+        "viewerVariableName"?: string;
     }
     interface IntrinsicElements {
         "ng-layer-tune": NgLayerTune;
