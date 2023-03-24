@@ -23,15 +23,6 @@ async function getLayer(spec: TGetLayer) {
     layerName,
     viewerVariableName
   } = spec
-  // const viewer = (viewerObj || (window as any).viewer)
-
-  // let nehuba  
-
-  // await new Promise((rs)=>setTimeout(() => {
-  //   nehuba = nehubaName && (window as any)[nehubaName] && (window as any)[nehubaName].ngviewer?
-  //     (window as any)[nehubaName].ngviewer : viewer
-  //   rs('OK');
-  // }, 1000));
   
   const viewer = (viewerObj || (window as any)[ viewerVariableName || 'viewer'])
 
@@ -70,7 +61,6 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
 
   }
   async init(){
-    // const layerObj = await getLayer({ layerName: this.ngLayerName, nehubaName: this.nehubaName || null });
     const layerObj = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName });
     const warning = await verifyLayer(layerObj)
     if (warning) {
