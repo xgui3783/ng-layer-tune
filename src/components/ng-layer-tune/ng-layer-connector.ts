@@ -3,7 +3,7 @@ import { retry, getUuid } from "../../utils/utils"
 type TGetLayer = {
   viewerObj?: any
   layerName: string
-  nehubaName?: string
+  viewerVariableName?: string
 }
 
 type PartialNgLayer = {
@@ -21,19 +21,22 @@ async function getLayer(spec: TGetLayer) {
   const {
     viewerObj,
     layerName,
-    nehubaName
+    viewerVariableName
   } = spec
-  const viewer = (viewerObj || (window as any).viewer)
+  // const viewer = (viewerObj || (window as any).viewer)
 
-  let nehuba  
+  // let nehuba  
 
-  await new Promise((rs)=>setTimeout(() => {
-    nehuba = nehubaName && (window as any)[nehubaName]? (window as any)[nehubaName].ngviewer : viewer
-    rs('OK');
-  }, 1000)); 
+  // await new Promise((rs)=>setTimeout(() => {
+  //   nehuba = nehubaName && (window as any)[nehubaName] && (window as any)[nehubaName].ngviewer?
+  //     (window as any)[nehubaName].ngviewer : viewer
+  //   rs('OK');
+  // }, 1000));
+  
+  const viewer = (viewerObj || (window as any)[ viewerVariableName || 'viewer'])
 
   return await retry(async () => {
-    const layerObj = nehuba.layerManager.getLayerByName(layerName)
+    const layerObj = viewer.layerManager.getLayerByName(layerName)
     if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
     return layerObj
   }, {
@@ -63,12 +66,12 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
   private ngLayer: PartialNgLayer
   public connected = false
 
-  constructor(private ngLayerName: string, private nehubaName?: string) {
+  constructor(private ngLayerName: string, private viewerVariableName?: string) {
 
   }
   async init(){
     // const layerObj = await getLayer({ layerName: this.ngLayerName, nehubaName: this.nehubaName || null });
-    const layerObj = await getLayer({ layerName: this.ngLayerName, nehubaName: this.nehubaName || null });
+    const layerObj = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName });
     const warning = await verifyLayer(layerObj)
     if (warning) {
       throw new Error(warning.message)

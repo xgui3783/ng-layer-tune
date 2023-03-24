@@ -17,12 +17,12 @@ export namespace Components {
         "iFrameName": string;
         "iframeLayerSpec": NgLayerSpec;
         "initialOpacity": number;
-        "nehubaName": string;
         "ngLayerName": string;
         "thresholdMax": number;
         "thresholdMin": number;
         "useIframeCtrl": boolean;
         "useNativeControl": boolean;
+        "viewerVariableName": string;
     }
 }
 declare global {
@@ -45,13 +45,13 @@ declare namespace LocalJSX {
         "iFrameName"?: string;
         "iframeLayerSpec"?: NgLayerSpec;
         "initialOpacity"?: number;
-        "nehubaName"?: string;
         "ngLayerName"?: string;
         "onErrorEmitter"?: (event: CustomEvent<TErrorEvent>) => void;
         "thresholdMax"?: number;
         "thresholdMin"?: number;
         "useIframeCtrl"?: boolean;
         "useNativeControl"?: boolean;
+        "viewerVariableName"?: string;
     }
     interface IntrinsicElements {
         "ng-layer-tune": NgLayerTune;
