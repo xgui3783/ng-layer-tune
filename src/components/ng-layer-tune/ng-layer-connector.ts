@@ -13,6 +13,7 @@ type PartialNgLayer = {
     }
     fragmentMain: {
       restoreState(shader: string): void
+      value: string
     }
   }
 }
@@ -50,6 +51,7 @@ export interface NgLayerInterface {
   connected: boolean
   setOpacity(opacity: number): void
   setShader(shader: string): void
+  getShader(): Promise<string>
 }
 
 export class IntraFrameNglayerConnector implements NgLayerInterface {
@@ -74,6 +76,9 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
   }
   setShader(shader: string): void {
     this.ngLayer.layer.fragmentMain.restoreState(shader)
+  }
+  async getShader(): Promise<string> {
+    return this.ngLayer.layer.fragmentMain.value
   }
 }
 
@@ -215,5 +220,8 @@ export class IFrameNgLayerConnector implements NgLayerInterface {
     this.shader = shader
     const triggeredUpdateId = this.updateId
     setTimeout(() => this.loadIframeLayer(triggeredUpdateId), 32)
+  }
+  getShader(): Promise<string> {
+    return Promise.reject(`IFrameNgLayerConnector getShader not yet implemented`)
   }
 }

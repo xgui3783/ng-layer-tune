@@ -219,14 +219,12 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
       const { brightness, contrast, highThreshold, lowThreshold, removeBg } = cfg
       const _lowThreshold = lowThreshold + 1e-10
       const getChan = (variable: string, idx: number) => `float ${variable} = ( toNormalized(getDataValue( ${idx} )) - ${_lowThreshold.toFixed(10)} ) / ( ${ highThreshold - _lowThreshold } ) ${ brightness > 0 ? '+' : '-' } ${Math.abs(brightness).toFixed(10)};`
-      return `void main() {
-        ${getChan('r', 0)}
-        ${getChan('g', 1)}
-        ${getChan('b', 2)}
-        ${ removeBg ? 'if (r < 0.01 && g < 0.01 && b < 0.01 ) { emitTransparent(); } else {' : '' }
-        emitRGB(vec3(r, g, b) * exp(${contrast.toFixed(10)}));
-        ${ removeBg ? '}' : '' }
-      }`
+      return `// ${encodeState({...cfg, colormap: EnumColorMapName[EnumColorMapName.RGB]})}
+void main() { ${getChan('r', 0)} ${getChan('g', 1)} ${getChan('b', 2)}
+${ removeBg ? 'if (r < 0.01 && g < 0.01 && b < 0.01 ) { emitTransparent(); } else {' : '' }
+emitRGB(vec3(r, g, b) * exp(${contrast.toFixed(10)}));
+${ removeBg ? '}' : '' }
+}`
     }
   } ]
 ])
@@ -240,6 +238,7 @@ type TGetShaderCfg = {
   contrast: number
   removeBg: boolean
   hideZero: boolean
+  opacity: number
 }
 
 export const getShader = (cfg: TGetShaderCfg): string => {
@@ -250,19 +249,21 @@ export const getShader = (cfg: TGetShaderCfg): string => {
     brightness = 0,
     contrast = 0,
     removeBg = false,
-    hideZero = false
+    hideZero = false,
+    opacity = 0.5,
   } = cfg
   const { header, main, premain, override } = mapKeyColorMap.get(colormap) || (() => {
     console.warn(`colormap ${colormap} not found. Using default colormap instead`)
     return mapKeyColorMap.get(EnumColorMapName.GREYSCALE)
   })()
   if (!!override) {
-    return override({ lowThreshold, highThreshold, brightness, contrast, removeBg, hideZero })
+    return override({ lowThreshold, highThreshold, brightness, contrast, removeBg, hideZero, opacity })
   }
 
   // so that if lowthreshold is defined to be 0, at least some background removal will be done
   const _lowThreshold = lowThreshold + 1e-10
-  return `${header}
+  return `// ${encodeState(cfg)}
+${header}
 ${premain}
 void main() {
   float raw_x = toNormalized(getDataValue());
@@ -276,4 +277,91 @@ void main() {
   ${ removeBg ? '}' : '' }
 }
 `
+}
+
+export const cmEncodingVersion = 'encodedCmState-0.1'
+
+function encodeBool(...flags: boolean[]) {
+  if (flags.length > 8) {
+    throw new Error(`encodeBool can only handle upto 8 bools`)
+  }
+  let rValue = 0
+  flags.forEach((flag, idx) => {
+    if (flag) {
+      rValue += (1 << idx)
+    }
+  })
+  return rValue
+}
+function decodeBool(num: number) {
+  const rBool: boolean[] = []
+  for (let i = 0; i < 8; i ++) {
+    rBool.push( ((num >> i) & 1) === 1 )
+  }
+  return rBool
+}
+export function encodeState(cfg: TGetShaderCfg): string {
+  const {
+    brightness,
+    colormap,
+    contrast,
+    hideZero,
+    highThreshold,
+    lowThreshold,
+    opacity,
+    removeBg
+  } = cfg
+
+  /**
+   * encode Enum as key of Enum
+   */
+  const cmstring = Object.keys(EnumColorMapName).find(v => EnumColorMapName[v] === colormap)
+
+  const array = new Float32Array([
+    brightness,
+    contrast,
+    lowThreshold,
+    highThreshold,
+    opacity,
+    encodeBool(hideZero, removeBg)
+  ])
+  
+  const encodedVal = window.btoa(new Uint8Array(array.buffer).reduce((data, v) => data + String.fromCharCode(v), ''))
+  return `${cmEncodingVersion}:${cmstring}:${encodedVal}`
+}
+
+export function decodeState(encodedState: string): TGetShaderCfg {
+  const stateV = encodedState.split(':')[0]
+  if (stateV !== cmEncodingVersion) {
+    throw new Error(`Cannot parse state. Its version is ${stateV}. Currently, ng-layer-tune is at version ${cmEncodingVersion}`)
+  }
+  const [ _, cmstring, encodedVal ] = encodedState.split(":")
+  const _array = Uint8Array.from(window.atob(encodedVal), v => v.charCodeAt(0))
+  const array = new Float32Array(_array.buffer)
+  if (array.length !== 6) {
+    throw new Error(`Expecting decoded array to be 6 length long, but is instead ${array.length}`)
+  }
+  const [
+    brightness,
+    contrast,
+    lowThreshold,
+    highThreshold,
+    opacity,
+  ] = array
+  const [ hideZero, removeBg ] = decodeBool(array[5])
+
+  return {
+    brightness,
+    contrast,
+    lowThreshold,
+    highThreshold,
+    opacity,
+    hideZero,
+    removeBg,
+    
+    /**
+     * since enum is encoded as key of enum, just access it
+     */
+    colormap: EnumColorMapName[cmstring]
+  }
 }

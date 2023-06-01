@@ -1,5 +1,5 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
-import { EnumColorMapName, getShader } from '../../utils/colormaps';
+import { EnumColorMapName, cmEncodingVersion, decodeState, getShader } from '../../utils/colormaps';
 import { clamp, getDebouce } from '../../utils/utils';
 import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec } from "./ng-layer-connector"
 
@@ -131,6 +131,7 @@ export class NgLayerTune {
   @Watch('selectedShader')
   @Watch('hideBg')
   @Watch('hideZero')
+  @Watch('opacity')
   refreshShader(){
     this.debounce(() => {
       const shader = getShader({
@@ -140,7 +141,8 @@ export class NgLayerTune {
         brightness: this.brightness,
         contrast: this.contrast,
         removeBg: this.hideBg,
-        hideZero: this.hideZero
+        hideZero: this.hideZero,
+        opacity: this.opacity,
       })
       this.shaderCode = shader
       if (this.connector?.connected) this.connector.setShader(shader)
@@ -168,13 +170,32 @@ export class NgLayerTune {
     if (!this.useIframeCtrl) {
       this.connector = new IntraFrameNglayerConnector(this.ngLayerName, this.viewerVariableName)
       await this.connector.init()
-      return
+      
+    } else {
+      if (!this.iframeLayerSpec) return
+      this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
+      await this.connector.init()
+      this.connector.setOpacity(this.opacity)
+      this.connector.setShader(this.shaderCode)
     }
-    if (!this.iframeLayerSpec) return
-    this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
-    await this.connector.init()
-    this.connector.setOpacity(this.opacity)
-    this.connector.setShader(this.shaderCode)
+    try {
+      const shader = await this.connector.getShader()
+      const foundShaderCode = shader.split('\n').find(line => line.includes(cmEncodingVersion))
+      if (foundShaderCode) {
+        const { brightness, colormap, contrast, hideZero, highThreshold, lowThreshold, opacity, removeBg } = decodeState(foundShaderCode.replace('// ', ''))
+        this.hideBg = removeBg
+        this.opacity = opacity
+        this.lowerThreshold = lowThreshold
+        this.hideZero = hideZero
+        this.higherThreshold = highThreshold
+        this.contrast = contrast
+        this.brightness = brightness
+        this.selectedShader = colormap
+      }
+    } catch (e) {
+      console.error('error', e)
+    }
+
   }
 
   @Watch('ngLayerName')

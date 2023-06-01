@@ -17,11 +17,20 @@
         font-family: Verdana, Geneva, Tahoma, sans-serif;
       }
       .container {
-        display: grid; 
-        grid-auto-columns: 1fr; 
-        grid-template-rows: 1rem 12em auto; 
-        gap: 0px 0px; 
+        display: flex;
+        flex-direction: column;
       }
+      .container #control,
+      .container ng-layer-tune
+      {
+        flex: 0 0 auto;
+      }
+      
+      .container #neuroglancer-container
+      {
+        flex: 1 1 0px;
+      }
+      
       .neuroglancer-context-menu
       {
         display: none;
@@ -30,11 +39,14 @@
   </head>
   <body>
     <div class="container">
-      <div>
+      <div id="control">
         <span>
           ng-layer-tune: a widget that controls a neuroglancer image layer. 
         </span>
         <a href="https://github.com/xgui3783/ng-layer-tune">github</a>
+        <button data-vis-state="hide" onclick="toggleShowHide(this)">
+          hide
+        </button>
       </div>
       <!-- add this property to hide controls  -->
       <!-- hide-ctrl="lower_threshold,higher_threshold,brightness,contrast,colormap,hide-threshold-checkbox,hide-zero-value-checkbox" -->
@@ -155,6 +167,31 @@
   export_nehuba.createNehubaViewer(config, e => {
     console.error(e)
   })
+
+  
+  function toggleShowHide(button){
+    const container = document.querySelector('div.container')
+    if (button.dataset.visState === 'hide') {
+      const el = document.querySelector('ng-layer-tune')
+      if (el) {
+        el.parentElement.removeChild(el)
+      }
+    } else {
+      const el = document.createElement('ng-layer-tune')
+      el.setAttribute('ng-layer-name', 'peanut')
+      el.setAttribute('advanced-control', 'true')
+      el.setAttribute('threshold-min', '0.02')
+      el.setAttribute('threshold-max', '2')
+      const ng = document.getElementById('neuroglancer-container')
+      container.insertBefore(el, ng)
+    }
+    
+    button.dataset.visState = button.dataset.visState === 'hide'
+      ? 'show'
+      : 'hide'
+    button.textContent = button.dataset.visState
+    
+  }
   
   </script>
 </html>
