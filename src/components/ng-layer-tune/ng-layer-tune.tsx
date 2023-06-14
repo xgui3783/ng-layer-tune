@@ -317,7 +317,7 @@ export class NgLayerTune {
                 <option value="">--Please select a color map--</option>
                 {
                   this.colorMapNames.map(name => (
-                    <option value={name}>{name}</option>
+                    <option value={name} selected={name === this.selectedShader}>{name}</option>
                   ))
                 }
               </select>,
