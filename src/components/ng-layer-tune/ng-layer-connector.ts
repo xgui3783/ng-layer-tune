@@ -27,7 +27,7 @@ async function getLayer(spec: TGetLayer) {
   
   const viewer = (viewerObj || (window as any)[ viewerVariableName || 'viewer'])
 
-  return await retry(async () => {
+  const layerObj = await retry(async () => {
     const layerObj = viewer.layerManager.getLayerByName(layerName)
     if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
     return layerObj
@@ -35,16 +35,19 @@ async function getLayer(spec: TGetLayer) {
     retries: 10,
     timeout: 16,
   })
-}
 
-export async function verifyLayer(layerObj: any) {
-  await retry(async () => {
-    if (!!layerObj?.layer?.fragmentMain) {
-      throw new Error(`fragmentMain not yet defined!`)
+  try {
+    await retry(async () => {
+      if (!layerObj?.layer?.fragmentMain) {
+        throw new Error(`fragmentMain not yet defined!`)
+      }
+    }, { retries: 10, timeout: 16 })
+    return { layerObj }
+  } catch (e) {
+    return {
+      layerObj,
+      warning: `layer.initialSpecification.type not defined. Component may not funciton properly.`
     }
-  }, { retries: 10, timeout: 16 })
-  return {
-    message: `layer.initialSpecification.type not defined. Component may not funciton properly.`
   }
 }
 
@@ -65,10 +68,9 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
 
   }
   async init(){
-    const layerObj = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName });
-    const warning = await verifyLayer(layerObj)
+    const { layerObj, warning } = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName })
     if (warning) {
-      throw new Error(warning.message)
+      throw new Error(warning)
     }
     this.ngLayer = layerObj
     this.connected = true
