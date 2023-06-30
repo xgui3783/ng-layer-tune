@@ -38,9 +38,11 @@ async function getLayer(spec: TGetLayer) {
 }
 
 export async function verifyLayer(layerObj: any) {
-  if (!!layerObj?.layer?.fragmentMain) {
-    return null
-  }
+  await retry(async () => {
+    if (!!layerObj?.layer?.fragmentMain) {
+      throw new Error(`fragmentMain not yet defined!`)
+    }
+  }, { retries: 10, timeout: 16 })
   return {
     message: `layer.initialSpecification.type not defined. Component may not funciton properly.`
   }

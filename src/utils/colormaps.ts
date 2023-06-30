@@ -18,6 +18,10 @@ export enum EnumColorMapName{
 
   GREYSCALE='greyscale',
 
+  RED='red',
+  GREEN='green',
+  BLUE='blue',
+
   RGB='rgb (3 channel)'
 }
 
@@ -202,6 +206,27 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     main: 'rgb=inferno(x);'
   } ],
 
+  [
+    EnumColorMapName.RED, {
+      header: '',
+      premain: '',
+      main: 'rgb=vec3(x, 0., 0.);'
+    }
+  ],
+  [
+    EnumColorMapName.GREEN, {
+      header: '',
+      premain: '',
+      main: 'rgb=vec3(0., x, 0.);'
+    }
+  ],
+  [
+    EnumColorMapName.BLUE, {
+      header: '',
+      premain: '',
+      main: 'rgb=vec3(0., 0., x);'
+    }
+  ],
   [ EnumColorMapName.GREYSCALE, {
     header: COLORMAP_IS_GREYSCALE,
     premain: '',
