@@ -57,6 +57,7 @@ export interface NgLayerInterface {
   setOpacity(opacity: number): void
   setShader(shader: string): void
   getShader(): Promise<string>
+  getUrl(): Promise<string>
 }
 
 export class IntraFrameNglayerConnector implements NgLayerInterface {
@@ -83,6 +84,14 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
   }
   async getShader(): Promise<string> {
     return this.ngLayer.layer.fragmentMain.value
+  }
+
+  async getUrl(): Promise<string> {
+    const { layerObj, warning } = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName })
+    if (warning) {
+      throw new Error(warning)
+    }
+    return layerObj.initialSpecification.source.replace(/^precomputed:\/\//, '')
   }
 }
 
@@ -227,5 +236,9 @@ export class IFrameNgLayerConnector implements NgLayerInterface {
   }
   getShader(): Promise<string> {
     return Promise.reject(`IFrameNgLayerConnector getShader not yet implemented`)
+  }
+
+  async getUrl(): Promise<string> {
+    return Promise.reject(`IFrameNgLayerConnector getUrl not yet implemented`)
   }
 }
