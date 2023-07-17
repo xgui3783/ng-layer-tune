@@ -197,8 +197,15 @@ export class NgLayerTune {
         this.selectedShader = colormap
       } else {
         const url = await this.connector.getUrl()
-        const meta = await (await fetch(`${url}/meta.json`)).json()
-        const { version, data, override } = meta
+
+        let meta
+        try {
+          meta = await (await fetch(`${url}/meta.json`)).json()
+        } catch {
+          meta = null
+        }
+        
+        const { version, data, override } = meta || {}
         if (version === 1) {
           const { type: datatype } = data || {}
           if (datatype === "image/3d") {
