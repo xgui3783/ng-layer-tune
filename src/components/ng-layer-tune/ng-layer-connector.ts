@@ -27,26 +27,33 @@ async function getLayer(spec: TGetLayer) {
   
   const viewer = (viewerObj || (window as any)[ viewerVariableName || 'viewer'])
 
-  const layerObj = await retry(async () => {
-    const layerObj = viewer.layerManager.getLayerByName(layerName)
-    if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
-    return layerObj
-  }, {
-    retries: 10,
-    timeout: 16,
-  })
-
   try {
-    await retry(async () => {
-      if (!layerObj?.layer?.fragmentMain) {
-        throw new Error(`fragmentMain not yet defined!`)
+    const layerObj = await retry(async () => {
+      const layerObj = viewer.layerManager.getLayerByName(layerName)
+      if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
+
+      if (typeof layerObj.isReady === "function") {
+        if (layerObj.isReady()) {
+          return layerObj
+        }
+        throw new Error(`layer not yet ready`)
       }
-    }, { retries: 10, timeout: 16 })
+      
+      /**
+       * fallback, for earlier version of neuroglancer
+       */
+      if (layerObj?.layer?.fragmentMain) {
+        return layerObj
+      }
+      throw new Error(`fragmentMain not yet defined!`)
+    }, { retries: 100, timeout: 160 })
+
     return { layerObj }
   } catch (e) {
+    const layerObj = viewer.layerManager.getLayerByName(layerName)
     return {
       layerObj,
-      warning: `layer.initialSpecification.type not defined. Component may not funciton properly.`
+      warning: `Some error occurred. This component may not function properly. ${e.toString()}`
     }
   }
 }
@@ -91,7 +98,17 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
     if (warning) {
       throw new Error(warning)
     }
-    return layerObj.initialSpecification.source.replace(/^precomputed:\/\//, '')
+    let url: string
+    if (typeof layerObj.initialSpecification.source === "string") {
+      url = layerObj.initialSpecification.source
+    }
+    if (typeof layerObj.initialSpecification.source.url === "string") {
+      url = layerObj.initialSpecification.source.url
+    }
+    if (!url) {
+      throw new Error(`Cannot find url`)
+    }
+    return url.replace(/^precomputed:\/\//, '')
   }
 }
 
