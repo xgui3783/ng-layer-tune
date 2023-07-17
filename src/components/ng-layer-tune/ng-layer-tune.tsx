@@ -117,6 +117,7 @@ export class NgLayerTune {
   @State()
   hideZero: boolean = false
 
+  overrideShader: string
 
   @Method()
   async forceRefreshShader() {
@@ -145,7 +146,7 @@ export class NgLayerTune {
         opacity: this.opacity,
       })
       this.shaderCode = shader
-      if (this.connector?.connected) this.connector.setShader(shader)
+      if (this.connector?.connected) this.connector.setShader(this.overrideShader || shader)
     })
   }
 
@@ -179,7 +180,7 @@ export class NgLayerTune {
       this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
       await this.connector.init()
       this.connector.setOpacity(this.opacity)
-      this.connector.setShader(this.shaderCode)
+      this.connector.setShader(this.overrideShader || this.shaderCode)
     }
     try {
       const shader = await this.connector.getShader()
@@ -194,6 +195,17 @@ export class NgLayerTune {
         this.contrast = contrast
         this.brightness = brightness
         this.selectedShader = colormap
+      } else {
+        const url = await this.connector.getUrl()
+        const meta = await (await fetch(`${url}/meta.json`)).json()
+        const { version, data, override } = meta
+        if (version === 1) {
+          const { type: datatype } = data || {}
+          if (datatype === "image/3d") {
+            this.selectedShader = EnumColorMapName.RGB
+          }
+        }
+        this.overrideShader = override?.shader
       }
     } catch (e) {
       console.error('error', e)
