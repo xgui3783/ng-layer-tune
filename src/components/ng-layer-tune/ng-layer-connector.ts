@@ -62,7 +62,7 @@ export interface NgLayerInterface {
   init(): Promise<void>
   connected: boolean
   setOpacity(opacity: number): void
-  setShader(shader: string): void
+  setShader(shader: string): Promise<void>
   getShader(): Promise<string>
   getUrl(): Promise<string>
 }
@@ -86,8 +86,9 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
   setOpacity(opacity: number): void {
     this.ngLayer.layer.opacity.restoreState(opacity)
   }
-  setShader(shader: string): void {
-    this.ngLayer.layer.fragmentMain.restoreState(shader)
+  async setShader(shader: string): Promise<void> {
+    const { layerObj } = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName })
+    layerObj.layer.fragmentMain.restoreState(shader)
   }
   async getShader(): Promise<string> {
     return this.ngLayer.layer.fragmentMain.value
@@ -245,7 +246,7 @@ export class IFrameNgLayerConnector implements NgLayerInterface {
     const triggeredUpdateId = this.updateId
     setTimeout(() => this.loadIframeLayer(triggeredUpdateId), 32)
   }
-  setShader(shader: string): void {
+  async setShader(shader: string): Promise<void> {
     this.updateId += 1
     this.shader = shader
     const triggeredUpdateId = this.updateId

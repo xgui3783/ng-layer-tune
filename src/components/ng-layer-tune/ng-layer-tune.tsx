@@ -180,7 +180,7 @@ export class NgLayerTune {
       this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
       await this.connector.init()
       this.connector.setOpacity(this.opacity)
-      this.connector.setShader(this.overrideShader || this.shaderCode)
+      await this.connector.setShader(this.overrideShader || this.shaderCode)
     }
     try {
       const shader = await this.connector.getShader()
