@@ -268,7 +268,7 @@ type TGetShaderCfg = {
 
 export const getShader = (cfg: TGetShaderCfg): string => {
   const {
-    colormap = EnumColorMapName.GREYSCALE,
+    colormap = EnumColorMapName.MAGMA,
     lowThreshold = 0,
     highThreshold = 1,
     brightness = 0,
@@ -372,7 +372,7 @@ export function decodeState(encodedState: string): TGetShaderCfg {
     lowThreshold,
     highThreshold,
     opacity,
-  ] = array
+  ] = Array.from(array).map(v => Math.round(v * 100) / 100)
   const [ hideZero, removeBg ] = decodeBool(array[5])
 
   return {

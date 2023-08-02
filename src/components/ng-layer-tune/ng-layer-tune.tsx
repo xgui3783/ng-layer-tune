@@ -121,7 +121,6 @@ export class NgLayerTune {
 
   @Method()
   async forceRefreshShader() {
-    console.log('refresh shader!')
     this.refreshShader()
   }
 
