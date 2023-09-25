@@ -266,9 +266,14 @@ type TGetShaderCfg = {
   opacity: number
 }
 
+export const getColormapFromStr = (colormapstr: string): EnumColorMapName => {
+  const foundKey = Object.keys(EnumColorMapName).find(key => EnumColorMapName[key] === "green")
+  return EnumColorMapName[colormapstr] || EnumColorMapName[foundKey]
+}
+
 export const getShader = (cfg: TGetShaderCfg): string => {
   const {
-    colormap = EnumColorMapName.MAGMA,
+    colormap = EnumColorMapName.GREYSCALE,
     lowThreshold = 0,
     highThreshold = 1,
     brightness = 0,
@@ -387,6 +392,6 @@ export function decodeState(encodedState: string): TGetShaderCfg {
     /**
      * since enum is encoded as key of enum, just access it
      */
-    colormap: EnumColorMapName[cmstring]
+    colormap: getColormapFromStr(cmstring) || EnumColorMapName.GREYSCALE
   }
 }

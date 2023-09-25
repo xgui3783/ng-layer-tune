@@ -1,5 +1,5 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
-import { EnumColorMapName, cmEncodingVersion, decodeState, getShader } from '../../utils/colormaps';
+import { EnumColorMapName, cmEncodingVersion, decodeState, getShader, getColormapFromStr } from '../../utils/colormaps';
 import { clamp, getDebouce } from '../../utils/utils';
 import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec } from "./ng-layer-connector"
 
@@ -199,16 +199,25 @@ export class NgLayerTune {
 
         let meta
         try {
-          meta = await (await fetch(`${url}/meta.json`)).json()
+          meta = await (await fetch(`${url}/meta`)).json()
         } catch {
           meta = null
         }
         
-        const { version, data, override } = meta || {}
+        const { version, data, override, preferredColormap } = meta || {}
         if (version === 1) {
           const { type: datatype } = data || {}
           if (datatype === "image/3d") {
             this.selectedShader = EnumColorMapName.RGB
+          } else {
+            this.selectedShader = EnumColorMapName.GREYSCALE
+            for (const str of (preferredColormap as string[])) {
+              const colormap = getColormapFromStr(str)
+              if (!!colormap) {
+                this.selectedShader = colormap
+                break
+              }
+            }
           }
         }
         this.overrideShader = override?.shader
