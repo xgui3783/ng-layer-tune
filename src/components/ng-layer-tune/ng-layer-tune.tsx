@@ -97,6 +97,9 @@ export class NgLayerTune {
   @State()
   opacity: number = 0.5
 
+  @State()
+  useTextMode: boolean = false
+
   @Watch('opacity')
   updateOpacity(){
     if (this.connector?.connected) this.connector.setOpacity(this.opacity)
@@ -261,6 +264,13 @@ export class NgLayerTune {
         min, max, title, id, value, onInput
       } = opts
       if (this.hideCtrlList.includes(id)) return []
+      if (this.useTextMode) {
+        return [
+          <label style={this.labelStyle} htmlFor={id}>{title}</label>,
+          <input type="number" value={value} id={id} name={id} onInput={onInput} />,
+          <div></div>
+        ]
+      }
       return [
         <label style={this.labelStyle} htmlFor={id}>{title}</label>,
         <input
@@ -298,6 +308,12 @@ export class NgLayerTune {
     return (
       <Host>
         <form style={this.formStyle}>
+          {getCheckBox({
+            id: "export-mode",
+            title: 'Text Mode',
+            checked: this.useTextMode,
+            onInput: (ev: InputEvent) => this.useTextMode = (ev.target as HTMLInputElement).checked
+          })}
           {getRangeInput({
             min: 0,
             max: 1,
