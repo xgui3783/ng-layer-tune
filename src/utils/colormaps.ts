@@ -267,8 +267,14 @@ type TGetShaderCfg = {
 }
 
 export const getColormapFromStr = (colormapstr: string): EnumColorMapName => {
+  if (EnumColorMapName[colormapstr]) {
+    return EnumColorMapName[colormapstr]
+  }
   const foundKey = Object.keys(EnumColorMapName).find(key => EnumColorMapName[key] === colormapstr)
-  return EnumColorMapName[foundKey] || EnumColorMapName.GREYSCALE
+  if (foundKey) {
+    return EnumColorMapName[foundKey]
+  }
+  return EnumColorMapName.GREYSCALE
 }
 
 export const getShader = (cfg: TGetShaderCfg): string => {
