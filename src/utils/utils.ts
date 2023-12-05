@@ -67,3 +67,9 @@ export async function retry(fn: () => Promise<any>, opts?: TRetryConfig){
   }
   throw new Error(`[retry] fn failed ${retries} times. Aborting.`)
 }
+
+export function isNullish<T>(a: T|null|undefined): a is null|undefined{
+  if (a === null) return true
+  if (typeof a === "undefined") return true
+  return false
+}

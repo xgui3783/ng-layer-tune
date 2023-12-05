@@ -1,6 +1,6 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
 import { EnumColorMapName, cmEncodingVersion, decodeState, getShader, getColormapFromStr } from '../../utils/colormaps';
-import { clamp, getDebouce } from '../../utils/utils';
+import { clamp, getDebouce, isNullish } from '../../utils/utils';
 import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec } from "./ng-layer-connector"
 
 export type TErrorEvent = {
@@ -50,10 +50,14 @@ export class NgLayerTune {
   @Prop()
   ngLayerName: string
 
-  @Prop()
+  @Prop({
+    mutable: true
+  })
   thresholdMin: number = 0
 
-  @Prop()
+  @Prop({
+    mutable: true
+  })
   thresholdMax: number = 1
 
   @Prop()
@@ -119,6 +123,8 @@ export class NgLayerTune {
   hideBg: boolean = false
   @State()
   hideZero: boolean = false
+  @State()
+  step: number = 0.01
 
   overrideShader: string
 
@@ -154,6 +160,9 @@ export class NgLayerTune {
 
   @State()
   shaderCode: string
+
+  @State()
+  error: string = null
 
   private colorMapNames: string[] = [
     EnumColorMapName.VIRIDIS,
@@ -209,24 +218,38 @@ export class NgLayerTune {
         
         const { version, data, override, preferredColormap } = meta || {}
         if (version === 1) {
-          const { type: datatype } = data || {}
+          const { type: datatype, range } = data || {}
           if (datatype === "image/3d") {
             this.selectedShader = EnumColorMapName.RGB
-          } else {
-            this.selectedShader = EnumColorMapName.GREYSCALE
-            for (const str of (preferredColormap as string[])) {
-              const colormap = getColormapFromStr(str)
-              if (!!colormap) {
-                this.selectedShader = colormap
-                break
-              }
+          }
+
+          for (const str of (preferredColormap as string[])) {
+            const colormap = getColormapFromStr(str)
+            if (!!colormap) {
+              this.selectedShader = colormap
+              break
             }
           }
+
+          let min: number = Number.POSITIVE_INFINITY
+          let max: number = Number.NEGATIVE_INFINITY
+          for (const r of (range || []) as {min?: number, max?: number}[]) {
+            if (!isNullish(r.min)) {
+              min = Math.min(min, r.min)
+            }
+            if (!isNullish(r.max)) {
+              max = Math.max(max, r.max)
+            }
+          }
+          this.thresholdMin = min === Number.POSITIVE_INFINITY ? this.thresholdMin : min
+          this.thresholdMax = max === Number.NEGATIVE_INFINITY ? this.thresholdMax : max
+          this.step = (this.thresholdMax - this.thresholdMin) / 100
         }
         this.overrideShader = override?.shader
       }
     } catch (e) {
       console.error('error', e)
+      this.error = e.toString()
     }
 
   }
@@ -259,9 +282,16 @@ export class NgLayerTune {
   }
 
   render() {
-    const getRangeInput = (opts: {min: number, max: number, title: string, id: string, value: number, onInput: (ev: Event) => any}) => {
+    if (this.error) {
+      return (
+        <Host>
+          Cannot couple to layer. Did you try to couple to a segmentation layer?
+        </Host>
+      )
+    }
+    const getRangeInput = (opts: {step?: number, min: number, max: number, title: string, id: string, value: number, onInput: (ev: Event) => any}) => {
       const {
-        min, max, title, id, value, onInput
+        min, max, title, id, value, onInput, step=0.01
       } = opts
       if (this.hideCtrlList.includes(id)) return []
       if (this.useTextMode) {
@@ -277,7 +307,7 @@ export class NgLayerTune {
           type="range"
           min={min}
           max={max}
-          step="0.01"
+          step={step}
           value={value}
           onInput={ev => onInput(ev)}
           name={id}
@@ -309,7 +339,7 @@ export class NgLayerTune {
       <Host>
         <form style={this.formStyle}>
           {getCheckBox({
-            id: "export-mode",
+            id: "text_mode",
             title: 'Text Mode',
             checked: this.useTextMode,
             onInput: (ev: InputEvent) => this.useTextMode = (ev.target as HTMLInputElement).checked
@@ -327,6 +357,7 @@ export class NgLayerTune {
             max: this.thresholdMax,
             id: 'lower_threshold',
             title: 'Lower threshold',
+            step: this.step,
             onInput: ev => this.lowerThreshold = Number((ev.target as any).value),
             value: this.lowerThreshold
           })}
@@ -336,6 +367,7 @@ export class NgLayerTune {
             max: this.thresholdMax,
             id: 'higher_threshold',
             title: 'Higher threshold',
+            step: this.step,
             onInput: ev => this.higherThreshold = Number((ev.target as any).value),
             value: this.higherThreshold
           })}
