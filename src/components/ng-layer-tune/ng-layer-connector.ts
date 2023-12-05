@@ -28,13 +28,16 @@ async function getLayer(spec: TGetLayer) {
   const viewer = (viewerObj || (window as any)[ viewerVariableName || 'viewer'])
 
   try {
-    const layerObj = await retry(async () => {
+    const { layerObj, warning } = await retry(async () => {
       const layerObj = viewer.layerManager.getLayerByName(layerName)
       if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
 
       if (typeof layerObj.isReady === "function") {
         if (layerObj.isReady()) {
-          return layerObj
+          const warning = !!(layerObj?.layer?.fragmentMain)
+          ? null
+          : `layer.fragmentMain undefined. Did you try to couple to a segmentation layer?`
+          return { layerObj, warning }
         }
         throw new Error(`layer not yet ready`)
       }
@@ -43,12 +46,12 @@ async function getLayer(spec: TGetLayer) {
        * fallback, for earlier version of neuroglancer
        */
       if (layerObj?.layer?.fragmentMain) {
-        return layerObj
+        return { layerObj }
       }
       throw new Error(`fragmentMain not yet defined!`)
     }, { retries: 100, timeout: 160 })
 
-    return { layerObj }
+    return { layerObj, warning }
   } catch (e) {
     const layerObj = viewer.layerManager.getLayerByName(layerName)
     return {
@@ -87,7 +90,10 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
     this.ngLayer.layer.opacity.restoreState(opacity)
   }
   async setShader(shader: string): Promise<void> {
-    const { layerObj } = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName })
+    const { layerObj, warning } = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName })
+    if (warning) {
+      throw new Error(warning)
+    }
     layerObj.layer.fragmentMain.restoreState(shader)
   }
   async getShader(): Promise<string> {

@@ -182,17 +182,22 @@ export class NgLayerTune {
 
   private async coupleLayer(){
     if (!this.ngLayerName) return
-    if (!this.useIframeCtrl) {
-      this.connector = new IntraFrameNglayerConnector(this.ngLayerName, this.viewerVariableName)
-      await this.connector.init()
-      
-    } else {
-      if (!this.iframeLayerSpec) return
-      this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
-      await this.connector.init()
-      this.connector.setOpacity(this.opacity)
-      await this.connector.setShader(this.overrideShader || this.shaderCode)
+    try {
+      if (!this.useIframeCtrl) {
+        this.connector = new IntraFrameNglayerConnector(this.ngLayerName, this.viewerVariableName)
+        await this.connector.init() 
+      } else {
+        if (!this.iframeLayerSpec) return
+        this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
+        await this.connector.init()
+        this.connector.setOpacity(this.opacity)
+        await this.connector.setShader(this.overrideShader || this.shaderCode)
+      }
+    } catch (e) {
+      this.error = e.toString()
+      console.error(e)
     }
+    
     try {
       const shader = await this.connector.getShader()
       const foundShaderCode = shader.split('\n').find(line => line.includes(cmEncodingVersion))
@@ -249,7 +254,6 @@ export class NgLayerTune {
       }
     } catch (e) {
       console.error('error', e)
-      this.error = e.toString()
     }
 
   }
