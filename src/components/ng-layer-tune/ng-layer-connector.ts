@@ -230,13 +230,17 @@ export class IFrameNgLayerConnector implements NgLayerInterface {
   private async loadIframeLayer(triggeredUpdateId: number) {
     if (triggeredUpdateId !== this.updateId) return
     if (!this.opacity || !this.shader) return
+    let source = this.ngLayerSpec.source
+    if (! /^n5:\/\/|^precomputed:\/\//.test(source)) {
+      source = `precomputed://${source}`
+    }
     await this.postMessage({
 
       method: `sxplr.loadLayers`,
       params: {
         layers: [{
           clType: 'customlayer/nglayer',
-          source: `precomputed://${this.ngLayerSpec.source}`,
+          source,
           transform: this.ngLayerSpec.transform,
           opacity: this.opacity,
           shader: this.shader,
