@@ -47,6 +47,9 @@
         <button data-vis-state="hide" onclick="toggleShowHide(this)">
           hide
         </button>
+        <button data-couple-target="image" onclick="toggleCoupleTarget(this)">
+          toggle couple
+        </button>
       </div>
       <!-- add this property to hide controls  -->
       <!-- hide-ctrl="lower_threshold,higher_threshold,brightness,contrast,colormap,hide-threshold-checkbox,hide-zero-value-checkbox" -->
@@ -59,8 +62,10 @@
   </body>
   <script>
   const layerId = 'peanut'
+  const layerIdSeg = 'peanut2'
   const _url = `https://neuroglancer.humanbrainproject.org/precomputed/WHS_SD_rat/templates/v1.01/t2star_masked`
   const url = `https://neuroglancer.humanbrainproject.eu/precomputed/WHS_SD_rat/templates/v1.01/t2star_masked`
+  const segmentation = "https://neuroglancer.humanbrainproject.eu/precomputed/data-repo-ng-bot/20210616-julichbrain-v2.9.0-complete-mpm/precomputed/GapMapPublicMPMAtlas_l_N10_nlin2StdColin27_29_publicDOI_7f7bae194464eb71431c9916614d5f89"
   const darkTheme = true
   const { scale } = { scale: 0.1 }
   const backgrd = darkTheme
@@ -109,6 +114,11 @@
             source: `precomputed://${url}`,
             type: "image",
             transform: [[1,0,0,-9550781],[0,1,0,-24355468],[0,0,1,-9707031],[0,0,0,1]]
+          },
+          [layerIdSeg]: {
+            source: `precomputed://${segmentation}`,
+            type: 'segmentation',
+            transform: [[1.0, 0.0, 0.0, -128500000.0], [0.0, 1.0, 0.0, -148500000.0], [0.0, 0.0, 1.0, -110500000.0], [0.0, 0.0, 0.0, 1.0]]
           }
         },
         "navigation": {
@@ -191,6 +201,35 @@
       : 'hide'
     button.textContent = button.dataset.visState
     
+  }
+
+
+  function toggleCoupleTarget(button){
+    const el = document.querySelector('ng-layer-tune')
+    if (!el) {
+      return
+    }
+    el.parentElement.removeChild(el)
+
+    let newTarget = null
+    let layername = null
+    if (button.dataset.coupleTarget === 'image') {
+      newTarget = 'segmentation'
+      layername = layerIdSeg
+    } else {
+      newTarget = "image"
+      layername = layerId
+    }
+    button.dataset.coupleTarget = newTarget
+
+    const container = document.querySelector('div.container')
+    const newEl = document.createElement('ng-layer-tune')
+    newEl.setAttribute('ng-layer-name', layername)
+    newEl.setAttribute('advanced-control', 'true')
+    newEl.setAttribute('threshold-min', '0.02')
+    newEl.setAttribute('threshold-max', '2')
+    const ng = document.getElementById('neuroglancer-container')
+    container.insertBefore(newEl, ng)
   }
   
   </script>

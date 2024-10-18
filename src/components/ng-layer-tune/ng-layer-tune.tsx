@@ -1,7 +1,7 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
 import { EnumColorMapName, cmEncodingVersion, decodeState, getShader, getColormapFromStr } from '../../utils/colormaps';
 import { clamp, getDebouce, isNullish } from '../../utils/utils';
-import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec } from "./ng-layer-connector"
+import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec, IntraFrameSegLayerConnector, isSegmentConnector } from "./ng-layer-connector"
 
 export type TErrorEvent = {
   message: string
@@ -125,8 +125,12 @@ export class NgLayerTune {
   hideZero: boolean = false
   @State()
   step: number = 0.01
+  @State()
+  hoverValue: number = 0
 
   overrideShader: string
+
+  layerIsSegment: boolean = false
 
   @Method()
   async forceRefreshShader() {
@@ -194,8 +198,14 @@ export class NgLayerTune {
         await this.connector.setShader(this.overrideShader || this.shaderCode)
       }
     } catch (e) {
-      this.error = e.toString()
-      console.error(e)
+      try {
+        this.connector = new IntraFrameSegLayerConnector(this.ngLayerName, this.viewerVariableName)
+        await this.connector.init() 
+      } catch (err2) {
+        
+        this.error = err2.toString()
+        console.error(err2)
+      }
     }
     
     try {
@@ -256,6 +266,13 @@ export class NgLayerTune {
       console.error('error', e)
     }
 
+    this.layerIsSegment = false
+    if (isSegmentConnector(this.connector)) {
+      this.layerIsSegment = true
+      this.connector.onValueUpdate(label => {
+        this.hoverValue = label
+      })
+    }
   }
 
   @Watch('ngLayerName')
@@ -342,6 +359,11 @@ export class NgLayerTune {
     return (
       <Host>
         <form style={this.formStyle}>
+          {this.layerIsSegment && [
+            <label style={this.labelStyle} htmlFor="hover_value">Hover Value</label>,
+            <input type="number" value={this.hoverValue} id="hover_value" name="hover_value" disabled/>,
+            <div></div>
+          ]}
           {getCheckBox({
             id: "text_mode",
             title: 'Text Mode',
@@ -356,7 +378,7 @@ export class NgLayerTune {
             onInput: ev => this.opacity = Number((ev.target as any).value),
             value: this.opacity
           })}
-          {getRangeInput({
+          {!this.layerIsSegment && getRangeInput({
             min: this.thresholdMin,
             max: this.thresholdMax,
             id: 'lower_threshold',
@@ -366,7 +388,7 @@ export class NgLayerTune {
             value: this.lowerThreshold
           })}
 
-          {getRangeInput({
+          {!this.layerIsSegment && getRangeInput({
             min: this.thresholdMin,
             max: this.thresholdMax,
             id: 'higher_threshold',
@@ -375,7 +397,7 @@ export class NgLayerTune {
             onInput: ev => this.higherThreshold = Number((ev.target as any).value),
             value: this.higherThreshold
           })}
-          {this.advancedControl && getRangeInput({
+          {!this.layerIsSegment && this.advancedControl && getRangeInput({
             min: -1,
             max: 1,
             id: 'brightness',
@@ -383,7 +405,7 @@ export class NgLayerTune {
             onInput: ev => this.brightness = Number((ev.target as any).value),
             value: this.brightness
           })}
-          {this.advancedControl && getRangeInput({
+          {!this.layerIsSegment && this.advancedControl && getRangeInput({
             min: -1,
             max: 1,
             id: 'contrast',
@@ -391,7 +413,7 @@ export class NgLayerTune {
             onInput: ev => this.contrast = Number((ev.target as any).value),
             value: this.contrast
           })}
-          {this.hideCtrlList.includes('colormap')
+          {this.layerIsSegment || this.hideCtrlList.includes('colormap')
             ? []
             : [
               <label style={this.labelStyle} htmlFor="colormap">Color map</label>,
@@ -406,14 +428,14 @@ export class NgLayerTune {
               <span></span>
             ]}
 
-          {getCheckBox({
+          {!this.layerIsSegment && getCheckBox({
             id: 'hide-threshold-checkbox',
             onInput: ev => this.hideBg = (ev.target as any).checked,
             checked: this.hideBg,
             title: 'Hide clamped'
           })}
 
-          {this.advancedControl && getCheckBox({
+          {!this.layerIsSegment && this.advancedControl && getCheckBox({
             id: 'hide-zero-value-checkbox',
             onInput: ev => this.hideZero = (ev.target as any).checked,
             checked: this.hideZero,

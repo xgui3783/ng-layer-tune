@@ -18,6 +18,25 @@ type PartialNgLayer = {
   }
 }
 
+type PartialNgSegLayer = {
+  layer: {
+    displayState: {
+      selectedAlpha: {
+        restoreState(opacity: number): void
+      }
+      segmentSelectionState: {
+        selectedSegment: {
+          low: number
+          high: number
+        }
+        changed: {
+          add: (cb: () => void) => () => void
+        }
+      }
+    }
+  }
+}
+
 async function getLayer(spec: TGetLayer) {
   const {
     viewerObj,
@@ -269,4 +288,81 @@ export class IFrameNgLayerConnector implements NgLayerInterface {
   async getUrl(): Promise<string> {
     return Promise.reject(`IFrameNgLayerConnector getUrl not yet implemented`)
   }
+}
+
+export class SegmentationNglayerConnector{
+  onValueUpdate(_cb: (label: number) => void){
+    throw new Error(`Not implemented`)
+  }
+  // onValueUpdate: ((cb: (label: number) => void) => void)
+}
+
+export class IntraFrameSegLayerConnector extends SegmentationNglayerConnector implements NgLayerInterface {
+  connected: boolean = false
+  ngLayer: PartialNgSegLayer = null
+
+  ondestroycb: (() => void)[] = []
+  onValueUpdateCb: ((label: number) => void)[] = []
+
+  async init(): Promise<void> {
+    const { layerObj } = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName })
+    if (!layerObj.layer.displayState) {
+      throw new Error(`layer.layer.displayState not defined. Does not seem to be a segmentation layer =/`)
+    }
+    this.ngLayer = layerObj as PartialNgSegLayer
+    this.connected = true
+    const ondestroycb = this.ngLayer.layer.displayState.segmentSelectionState.changed.add(
+      () => {
+        for (const cb of this.onValueUpdateCb){
+          cb(this.ngLayer.layer.displayState.segmentSelectionState.selectedSegment.low)
+        }
+      }
+    )
+    this.ondestroycb.push(ondestroycb)
+  }
+  
+  constructor(private ngLayerName: string, private viewerVariableName?: string) {
+    super()
+  }
+
+  setOpacity(opacity: number): void {
+    this.ngLayer.layer.displayState.selectedAlpha.restoreState(opacity)
+  }
+
+  async getShader(): Promise<string> {
+    return ""
+  }
+
+  async setShader(_shader: string): Promise<void> {
+    /**
+     * noop
+     */
+  }
+  async getUrl(): Promise<string> {
+    
+    const { layerObj } = await getLayer({ layerName: this.ngLayerName, viewerVariableName: this.viewerVariableName })
+    if (!layerObj.layer.displayState) {
+      throw new Error(`layer.layer.displayState not defined. Does not seem to be a segmentation layer =/`)
+    }
+    let url: string
+    if (typeof layerObj.initialSpecification.source === "string") {
+      url = layerObj.initialSpecification.source
+    }
+    if (typeof layerObj.initialSpecification.source.url === "string") {
+      url = layerObj.initialSpecification.source.url
+    }
+    if (!url) {
+      throw new Error(`Cannot find url`)
+    }
+    return url.replace(/^precomputed:\/\//, '')
+  }
+
+  onValueUpdate(cb: (label: number) => void) {
+    this.onValueUpdateCb.push(cb)
+  }
+
+}
+
+export function isSegmentConnector(instance: unknown): instance is SegmentationNglayerConnector{
+  return instance instanceof SegmentationNglayerConnector
 }
