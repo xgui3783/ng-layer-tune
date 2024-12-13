@@ -8,6 +8,10 @@ export const COLORMAP_IS_PLASMA = `// iav-colormap-is-plasma`
 export const COLORMAP_IS_INFERNO = `// iav-colormap-is-inferno`
 
 export const COLORMAP_IS_GREYSCALE = `// iav-colormap-is-greyscale`
+
+export const PRECISION = 4
+export const PRECISION_MUL = 10 ** PRECISION
+
 export enum EnumColorMapName{
   JET='jet',
   
@@ -383,7 +387,7 @@ export function decodeState(encodedState: string): TGetShaderCfg {
     lowThreshold,
     highThreshold,
     opacity,
-  ] = Array.from(array).map(v => Math.round(v * 100) / 100)
+  ] = Array.from(array).map(v => Math.round(v * PRECISION_MUL) / PRECISION_MUL)
   const [ hideZero, removeBg ] = decodeBool(array[5])
 
   return {

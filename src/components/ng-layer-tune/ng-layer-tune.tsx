@@ -1,10 +1,7 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
-import { EnumColorMapName, cmEncodingVersion, decodeState, getShader, getColormapFromStr } from '../../utils/colormaps';
+import { EnumColorMapName, cmEncodingVersion, decodeState, getShader, getColormapFromStr, PRECISION, PRECISION_MUL } from '../../utils/colormaps';
 import { clamp, getDebouce, isNullish } from '../../utils/utils';
 import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec, IntraFrameSegLayerConnector, isSegmentConnector } from "./ng-layer-connector"
-
-const defaultStepSize = 1e4
-const sigfig = Math.round(Math.log10(defaultStepSize))
 
 export type TErrorEvent = {
   message: string
@@ -127,7 +124,7 @@ export class NgLayerTune {
   @State()
   hideZero: boolean = false
   @State()
-  step: number = 1 / defaultStepSize
+  step: number = 1 / PRECISION_MUL
   @State()
   hoverValue: number = 0
 
@@ -261,7 +258,7 @@ export class NgLayerTune {
           }
           this.thresholdMin = min === Number.POSITIVE_INFINITY ? this.thresholdMin : min
           this.thresholdMax = max === Number.NEGATIVE_INFINITY ? this.thresholdMax : max
-          this.step = (this.thresholdMax - this.thresholdMin) / defaultStepSize
+          this.step = (this.thresholdMax - this.thresholdMin) / PRECISION_MUL
         }
         this.overrideShader = override?.shader
       }
@@ -315,7 +312,7 @@ export class NgLayerTune {
     }
     const getRangeInput = (opts: {step?: number, min: number, max: number, title: string, id: string, value: number, onInput: (ev: Event) => any}) => {
       const {
-        min, max, title, id, value, onInput, step=1/defaultStepSize
+        min, max, title, id, value, onInput, step=1/PRECISION_MUL
       } = opts
       if (this.hideCtrlList.includes(id)) return []
       if (this.useTextMode) {
@@ -337,7 +334,7 @@ export class NgLayerTune {
           name={id}
           id={id}/>,
         <span>
-          {value.toFixed(sigfig)}
+          {value.toFixed(PRECISION)}
         </span>
       ]
     }
