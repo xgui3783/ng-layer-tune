@@ -3,6 +3,9 @@ import { EnumColorMapName, cmEncodingVersion, decodeState, getShader, getColorma
 import { clamp, getDebouce, isNullish } from '../../utils/utils';
 import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec, IntraFrameSegLayerConnector, isSegmentConnector } from "./ng-layer-connector"
 
+const defaultStepSize = 1e4
+const sigfig = Math.round(Math.log10(defaultStepSize))
+
 export type TErrorEvent = {
   message: string
 }
@@ -124,7 +127,7 @@ export class NgLayerTune {
   @State()
   hideZero: boolean = false
   @State()
-  step: number = 0.01
+  step: number = 1 / defaultStepSize
   @State()
   hoverValue: number = 0
 
@@ -258,7 +261,7 @@ export class NgLayerTune {
           }
           this.thresholdMin = min === Number.POSITIVE_INFINITY ? this.thresholdMin : min
           this.thresholdMax = max === Number.NEGATIVE_INFINITY ? this.thresholdMax : max
-          this.step = (this.thresholdMax - this.thresholdMin) / 100
+          this.step = (this.thresholdMax - this.thresholdMin) / defaultStepSize
         }
         this.overrideShader = override?.shader
       }
@@ -312,7 +315,7 @@ export class NgLayerTune {
     }
     const getRangeInput = (opts: {step?: number, min: number, max: number, title: string, id: string, value: number, onInput: (ev: Event) => any}) => {
       const {
-        min, max, title, id, value, onInput, step=0.01
+        min, max, title, id, value, onInput, step=1/defaultStepSize
       } = opts
       if (this.hideCtrlList.includes(id)) return []
       if (this.useTextMode) {
@@ -334,7 +337,7 @@ export class NgLayerTune {
           name={id}
           id={id}/>,
         <span>
-          {value}
+          {value.toFixed(sigfig)}
         </span>
       ]
     }
