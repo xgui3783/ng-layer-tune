@@ -226,7 +226,7 @@ export class NgLayerTune {
 
         let meta
         try {
-          meta = await (await fetch(`${url}/meta`)).json()
+          meta = await (await fetch(`${url}/meta.json`)).json()
         } catch {
           meta = null
         }
@@ -238,7 +238,7 @@ export class NgLayerTune {
             this.selectedShader = EnumColorMapName.RGB
           }
 
-          for (const str of (preferredColormap as string[])) {
+          for (const str of ((preferredColormap || []) as string[])) {
             const colormap = getColormapFromStr(str)
             if (!!colormap) {
               this.selectedShader = colormap
