@@ -7,6 +7,8 @@ export const COLORMAP_IS_MAGMA = `// iav-colormap-is-magma`
 export const COLORMAP_IS_PLASMA = `// iav-colormap-is-plasma`
 export const COLORMAP_IS_INFERNO = `// iav-colormap-is-inferno`
 
+export const COLORMAP_IS_ORANGES = `// iav-colormap-is-oranges`
+
 export const COLORMAP_IS_GREYSCALE = `// iav-colormap-is-greyscale`
 
 export const PRECISION = 4
@@ -19,6 +21,8 @@ export enum EnumColorMapName{
   PLASMA='plasma',
   MAGMA='magma',
   INFERNO='inferno',
+
+  ORANGES='oranges',
 
   GREYSCALE='greyscale',
 
@@ -209,7 +213,27 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `,
     main: 'rgb=inferno(x);'
   } ],
-
+  [ EnumColorMapName.ORANGES, {
+    header: COLORMAP_IS_ORANGES,
+    /**
+     * created by Neuroinflab CC/0
+     * https://www.shadertoy.com/view/tfBGWz
+     */
+    premain: `
+      vec3 oranges(float t) {
+      
+        const vec3 c0 = vec3(1.00022304,   0.96035224,   0.92132486);
+        const vec3 c1 = vec3(-0.20026948,  -0.16642638,  -0.44605086);
+        const vec3 c2 = vec3(2.44453732,  -3.08922281,  -4.65432932);
+        const vec3 c3 = vec3(-13.00019928,   8.80769566,  10.37336868);
+        const vec3 c4 = vec3(32.69180493, -18.07344841, -17.12959053);
+        const vec3 c5 = vec3(-37.8586546,   18.66298777,  19.0419038);
+        const vec3 c6 = vec3(15.42023529,  -6.94862455,  -8.0908642);      
+        return c0+t*(c1+t*(c2+t*(c3+t*(c4+t*(c5+t*c6)))));
+      }
+    `,
+    main: 'rgb=oranges(x);'
+  } ],
   [
     EnumColorMapName.RED, {
       header: '',
