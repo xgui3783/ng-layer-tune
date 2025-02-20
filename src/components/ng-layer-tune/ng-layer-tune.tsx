@@ -173,6 +173,7 @@ export class NgLayerTune {
     EnumColorMapName.PLASMA,
     EnumColorMapName.MAGMA,
     EnumColorMapName.INFERNO,
+    EnumColorMapName.ORANGES,
 
     EnumColorMapName.RED,
     EnumColorMapName.GREEN,
