@@ -8,6 +8,8 @@ export const COLORMAP_IS_PLASMA = `// iav-colormap-is-plasma`
 export const COLORMAP_IS_INFERNO = `// iav-colormap-is-inferno`
 
 export const COLORMAP_IS_ORANGES = `// iav-colormap-is-oranges`
+export const COLORMAP_IS_YELLOW_GREEN = `// iav-colormap-is-yellow-green`
+export const COLORMAP_IS_COOLWARM = `// iav-colormap-is-coolwarm`
 
 export const COLORMAP_IS_GREYSCALE = `// iav-colormap-is-greyscale`
 
@@ -23,6 +25,8 @@ export enum EnumColorMapName{
   INFERNO='inferno',
 
   ORANGES='oranges',
+  YELLOW_GREEN='yellowgreen',
+  COOLWARM='coolwarm',
 
   GREYSCALE='greyscale',
 
@@ -229,10 +233,55 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
         const vec3 c4 = vec3(32.69180493, -18.07344841, -17.12959053);
         const vec3 c5 = vec3(-37.8586546,   18.66298777,  19.0419038);
         const vec3 c6 = vec3(15.42023529,  -6.94862455,  -8.0908642);      
+
         return c0+t*(c1+t*(c2+t*(c3+t*(c4+t*(c5+t*c6)))));
       }
     `,
     main: 'rgb=oranges(x);'
+  } ],
+  [ EnumColorMapName.YELLOW_GREEN, {
+    header: COLORMAP_IS_YELLOW_GREEN,
+    /**
+     * created by Neuroinflab CC/0
+     * https://www.shadertoy.com/view/tfBGWz
+     */
+    premain: `
+      vec3 yellow_green(float t) {
+
+        const vec3 c0 = vec3(1.000748967807784, 0.9995581760287703, 0.8977070859423847);
+        const vec3 c1 = vec3(-0.3948082941024752, 0.44367414720358717, -1.754828526593224);
+        const vec3 c2 = vec3(3.7583023396367294, -6.408918546958409, 3.0930196890977624);
+        const vec3 c3 = vec3(-30.684917348451265, 23.384079101729025, 2.832646220883265);
+        const vec3 c4 = vec3(65.08901178705935, -44.8818725210936, -22.649729065418814);
+        const vec3 c5 = vec3(-58.09222188705258, 40.060760851353784, 29.640569800572912);
+        const vec3 c6 = vec3(19.322887436458423, -13.32612926652298, -11.898329702252322);
+
+        return c0+t*(c1+t*(c2+t*(c3+t*(c4+t*(c5+t*c6)))));
+      }
+    `,
+    main: 'rgb=yellow_green(x);'
+  } ],
+  [ EnumColorMapName.COOLWARM, {
+    header: COLORMAP_IS_COOLWARM,
+    /**
+     * created by Neuroinflab CC/0
+     * https://www.shadertoy.com/view/tfBGWz
+     */
+    premain: `
+      vec3 coolwarm(float t) {
+
+        const vec3 c0 = vec3(1.000748967807784, 0.9995581760287703, 0.8977070859423847);
+        const vec3 c1 = vec3(-0.3948082941024752, 0.44367414720358717, -1.754828526593224);
+        const vec3 c2 = vec3(3.7583023396367294, -6.408918546958409, 3.0930196890977624);
+        const vec3 c3 = vec3(-30.684917348451265, 23.384079101729025, 2.832646220883265);
+        const vec3 c4 = vec3(65.08901178705935, -44.8818725210936, -22.649729065418814);
+        const vec3 c5 = vec3(-58.09222188705258, 40.060760851353784, 29.640569800572912);
+        const vec3 c6 = vec3(19.322887436458423, -13.32612926652298, -11.898329702252322);
+
+        return c0+t*(c1+t*(c2+t*(c3+t*(c4+t*(c5+t*c6)))));
+      }
+    `,
+    main: 'rgb=coolwarm(x);'
   } ],
   [
     EnumColorMapName.RED, {
