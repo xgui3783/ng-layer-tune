@@ -1,16 +1,16 @@
-import { getColormapFromStr, EnumColorMapName } from "./colormaps"
+import { parseColorMapFromStr, COLOR_MAP_CONST } from "./colormaps"
 
 describe("getColormapFromStr", () => {
   it("translates values", () => {
-    expect(getColormapFromStr("jet")).toEqual(EnumColorMapName.JET)
+    expect(parseColorMapFromStr("jet")).toEqual(COLOR_MAP_CONST.JET)
   })
   it("translates keys", () => {
-    expect(getColormapFromStr("JET")).toEqual(EnumColorMapName.JET)
+    expect(parseColorMapFromStr("JET")).toEqual(COLOR_MAP_CONST.JET)
   })
   it("translates enums", () => {
-    expect(getColormapFromStr(EnumColorMapName.JET)).toEqual(EnumColorMapName.JET)
+    expect(parseColorMapFromStr(COLOR_MAP_CONST.JET)).toEqual(COLOR_MAP_CONST.JET)
   })
   it("defaults to greyscale", () => {
-    expect(getColormapFromStr("foo-bar")).toEqual(EnumColorMapName.GREYSCALE)
+    expect(parseColorMapFromStr("foo-bar")).toEqual(COLOR_MAP_CONST.GREYSCALE)
   })
 })

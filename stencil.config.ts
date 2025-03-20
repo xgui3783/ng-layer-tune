@@ -34,4 +34,5 @@ export const config: Config = {
       ]
     }
   ],
+  globalScript: "src/globalFn"
 };
