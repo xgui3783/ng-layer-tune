@@ -1,5 +1,5 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
-import { EnumColorMapName, cmEncodingVersion, decodeState, getShader, getColormapFromStr, PRECISION, PRECISION_MUL } from '../../utils/colormaps';
+import { encodeShader, parseColorMapFromStr, PRECISION, PRECISION_MUL, colorMapNames, COLOR_MAP_CONST, decodeShader } from '../../utils/colormaps';
 import { clamp, getDebouce, isNullish } from '../../utils/utils';
 import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec, IntraFrameSegLayerConnector, isSegmentConnector } from "./ng-layer-connector"
 
@@ -147,7 +147,7 @@ export class NgLayerTune {
   @Watch('opacity')
   refreshShader(){
     this.debounce(() => {
-      const shader = getShader({
+      const shader = encodeShader({
         lowThreshold: this.lowerThreshold,
         highThreshold: this.higherThreshold,
         colormap: this.selectedShader,
@@ -168,24 +168,7 @@ export class NgLayerTune {
   @State()
   error: string = null
 
-  private colorMapNames: string[] = [
-    EnumColorMapName.VIRIDIS,
-    EnumColorMapName.PLASMA,
-    EnumColorMapName.MAGMA,
-    EnumColorMapName.INFERNO,
-    EnumColorMapName.ORANGES,
-    EnumColorMapName.YELLOW_GREEN,
-    EnumColorMapName.COOLWARM,
-
-    EnumColorMapName.RED,
-    EnumColorMapName.GREEN,
-    EnumColorMapName.BLUE,
-    EnumColorMapName.GREYSCALE,
-    
-    EnumColorMapName.JET,
-
-    EnumColorMapName.RGB,
-  ]
+  private colorMapNames: string[] = colorMapNames
 
   private async coupleLayer(){
     if (!this.ngLayerName) return
@@ -213,9 +196,9 @@ export class NgLayerTune {
     
     try {
       const shader = await this.connector.getShader()
-      const foundShaderCode = shader.split('\n').find(line => line.includes(cmEncodingVersion))
-      if (foundShaderCode) {
-        const { brightness, colormap, contrast, hideZero, highThreshold, lowThreshold, opacity, removeBg } = decodeState(foundShaderCode.replace('// ', ''))
+      const decodedShader = decodeShader(shader)
+      if (decodedShader) {
+        const { brightness, colormap, contrast, hideZero, highThreshold, lowThreshold, opacity, removeBg } = decodedShader
         this.hideBg = removeBg
         this.opacity = opacity
         this.lowerThreshold = lowThreshold
@@ -238,11 +221,11 @@ export class NgLayerTune {
         if (version === 1) {
           const { type: datatype, range } = data || {}
           if (datatype === "image/3d") {
-            this.selectedShader = EnumColorMapName.RGB
+            this.selectedShader = COLOR_MAP_CONST.RGB
           }
 
           for (const str of ((preferredColormap || []) as string[])) {
-            const colormap = getColormapFromStr(str)
+            const colormap = parseColorMapFromStr(str)
             if (!!colormap) {
               this.selectedShader = colormap
               break

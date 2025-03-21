@@ -1,41 +1,35 @@
-export const COLORMAP_IS_DEFAULT = `// iav-colormap-default`
-
-export const COLORMAP_IS_JET = `// iav-colormap-is-jet`
-
-export const COLORMAP_IS_VIRIDIS = `// iav-colormap-is-viridis`
-export const COLORMAP_IS_MAGMA = `// iav-colormap-is-magma`
-export const COLORMAP_IS_PLASMA = `// iav-colormap-is-plasma`
-export const COLORMAP_IS_INFERNO = `// iav-colormap-is-inferno`
-
-export const COLORMAP_IS_ORANGES = `// iav-colormap-is-oranges`
-export const COLORMAP_IS_YELLOW_GREEN = `// iav-colormap-is-yellow-green`
-export const COLORMAP_IS_COOLWARM = `// iav-colormap-is-coolwarm`
-
-export const COLORMAP_IS_GREYSCALE = `// iav-colormap-is-greyscale`
-
 export const PRECISION = 4
 export const PRECISION_MUL = 10 ** PRECISION
 
-export enum EnumColorMapName{
-  JET='jet',
-  
-  VIRIDIS='viridis',
-  PLASMA='plasma',
-  MAGMA='magma',
-  INFERNO='inferno',
-
-  ORANGES='oranges',
-  YELLOW_GREEN='yellowgreen',
-  COOLWARM='coolwarm',
-
-  GREYSCALE='greyscale',
-
-  RED='red',
-  GREEN='green',
-  BLUE='blue',
-
-  RGB='rgb (3 channel)'
+function cmNameGuard(input: unknown): input is ColorMapName{
+  return (colorMapNames as any).includes(input)
 }
+
+export const COLOR_MAP_CONST = {
+  JET: 'jet',
+  
+  VIRIDIS: 'viridis',
+  PLASMA: 'plasma',
+  MAGMA: 'magma',
+  INFERNO: 'inferno',
+
+  ORANGES: 'oranges',
+  YELLOW_GREEN: 'yellowgreen',
+  COOLWARM: 'coolwarm',
+
+  GREYSCALE: 'greyscale',
+
+  RED: 'red',
+  GREEN: 'green',
+  BLUE: 'blue',
+
+  RGB: 'rgb (3 channel)',
+  RGBA: 'rgba (4 channel)',
+} as const
+
+export const colorMapNames = Object.values(COLOR_MAP_CONST)
+
+export type ColorMapName = typeof colorMapNames[number]
 
 interface IColorMap{
   /**
@@ -65,9 +59,9 @@ interface IColorMap{
   override?: (cfg: Omit<TGetShaderCfg, 'colormap'>) => string
 }
 
-const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
-  [ EnumColorMapName.JET, {
-    header: COLORMAP_IS_JET,
+const mapKeyColorMap = new Map<ColorMapName, IColorMap>([
+  [ COLOR_MAP_CONST.JET, {
+    header: "",
     /**
      *  The MIT License (MIT)
 
@@ -126,8 +120,8 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `
   } ],
 
-  [ EnumColorMapName.VIRIDIS, {
-    header: COLORMAP_IS_VIRIDIS,
+  [ COLOR_MAP_CONST.VIRIDIS, {
+    header: "",
     /**
      * created by mattz CC/0
      * https://www.shadertoy.com/view/WlfXRN
@@ -148,8 +142,8 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `,
     main: 'rgb=viridis(x);'
   } ],
-  [ EnumColorMapName.PLASMA, {
-    header: COLORMAP_IS_PLASMA,
+  [ COLOR_MAP_CONST.PLASMA, {
+    header: "",
     /**
      * created by mattz CC/0
      * https://www.shadertoy.com/view/WlfXRN
@@ -171,8 +165,8 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `,
     main: 'rgb=plasma(x);'
   } ],
-  [ EnumColorMapName.MAGMA, {
-    header: COLORMAP_IS_MAGMA,
+  [ COLOR_MAP_CONST.MAGMA, {
+    header: "",
     /**
      * created by mattz CC/0
      * https://www.shadertoy.com/view/WlfXRN
@@ -194,7 +188,7 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `,
     main: 'rgb=magma(x);'
   } ],
-  [ EnumColorMapName.INFERNO, {
+  [ COLOR_MAP_CONST.INFERNO, {
     header: '',
     /**
      * created by mattz CC/0
@@ -217,8 +211,8 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `,
     main: 'rgb=inferno(x);'
   } ],
-  [ EnumColorMapName.ORANGES, {
-    header: COLORMAP_IS_ORANGES,
+  [ COLOR_MAP_CONST.ORANGES, {
+    header: "",
     /**
      * created by Neuroinflab CC/0
      * https://www.shadertoy.com/view/tfBGWz
@@ -239,8 +233,8 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `,
     main: 'rgb=oranges(x);'
   } ],
-  [ EnumColorMapName.YELLOW_GREEN, {
-    header: COLORMAP_IS_YELLOW_GREEN,
+  [ COLOR_MAP_CONST.YELLOW_GREEN, {
+    header: "",
     /**
      * created by Neuroinflab CC/0
      * https://www.shadertoy.com/view/tfBGWz
@@ -261,8 +255,8 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     `,
     main: 'rgb=yellow_green(x);'
   } ],
-  [ EnumColorMapName.COOLWARM, {
-    header: COLORMAP_IS_COOLWARM,
+  [ COLOR_MAP_CONST.COOLWARM, {
+    header: "",
     /**
      * created by Neuroinflab CC/0
      * https://www.shadertoy.com/view/tfBGWz
@@ -284,33 +278,33 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
     main: 'rgb=coolwarm(x);'
   } ],
   [
-    EnumColorMapName.RED, {
+    COLOR_MAP_CONST.RED, {
       header: '',
       premain: '',
       main: 'rgb=vec3(x, 0., 0.);'
     }
   ],
   [
-    EnumColorMapName.GREEN, {
+    COLOR_MAP_CONST.GREEN, {
       header: '',
       premain: '',
       main: 'rgb=vec3(0., x, 0.);'
     }
   ],
   [
-    EnumColorMapName.BLUE, {
+    COLOR_MAP_CONST.BLUE, {
       header: '',
       premain: '',
       main: 'rgb=vec3(0., 0., x);'
     }
   ],
-  [ EnumColorMapName.GREYSCALE, {
-    header: COLORMAP_IS_GREYSCALE,
+  [ COLOR_MAP_CONST.GREYSCALE, {
+    header: "",
     premain: '',
     main: 'rgb=vec3(x, x, x);'
   } ],
 
-  [ EnumColorMapName.RGB, {
+  [ COLOR_MAP_CONST.RGB, {
     header: '',
     main: '',
     premain: '',
@@ -321,10 +315,30 @@ const mapKeyColorMap = new Map<EnumColorMapName, IColorMap>([
       const { brightness, contrast, highThreshold, lowThreshold, removeBg } = cfg
       const _lowThreshold = lowThreshold + 1e-10
       const getChan = (variable: string, idx: number) => `float ${variable} = ( toNormalized(getDataValue( ${idx} )) - ${_lowThreshold.toFixed(10)} ) / ( ${ highThreshold - _lowThreshold } ) ${ brightness > 0 ? '+' : '-' } ${Math.abs(brightness).toFixed(10)};`
-      return `// ${encodeState({...cfg, colormap: EnumColorMapName.RGB})}
+      return `// ${encodeState({...cfg, colormap: COLOR_MAP_CONST.RGB})}
 void main() { ${getChan('r', 0)} ${getChan('g', 1)} ${getChan('b', 2)}
 ${ removeBg ? 'if (r < 0.01 && g < 0.01 && b < 0.01 ) { emitTransparent(); } else {' : '' }
 emitRGB(vec3(r, g, b) * exp(${contrast.toFixed(10)}));
+${ removeBg ? '}' : '' }
+}`
+    }
+  } ],
+
+  [ COLOR_MAP_CONST.RGBA, {
+    header: '',
+    main: '',
+    premain: '',
+    override(cfg) {
+      /**
+       * hideZero has no effect
+       */
+      const { brightness, contrast, highThreshold, lowThreshold, removeBg } = cfg
+      const _lowThreshold = lowThreshold + 1e-10
+      const getChan = (variable: string, idx: number) => `float ${variable} = ( toNormalized(getDataValue( ${idx} )) - ${_lowThreshold.toFixed(10)} ) / ( ${ highThreshold - _lowThreshold } ) ${ brightness > 0 ? '+' : '-' } ${Math.abs(brightness).toFixed(10)};`
+      return `// ${encodeState({...cfg, colormap: COLOR_MAP_CONST.RGBA})}
+void main() { ${getChan('r', 0)} ${getChan('g', 1)} ${getChan('b', 2)} float a = toNormalized(getDataValue(3));
+${ removeBg ? 'if (r < 0.01 && g < 0.01 && b < 0.01 ) { emitTransparent(); } else {' : '' }
+emitRGBA(vec4(r, g, b, a) * exp(${contrast.toFixed(10)}));
 ${ removeBg ? '}' : '' }
 }`
     }
@@ -333,7 +347,7 @@ ${ removeBg ? '}' : '' }
 
 
 type TGetShaderCfg = {
-  colormap: EnumColorMapName,
+  colormap: ColorMapName,
   lowThreshold: number
   highThreshold: number
   brightness: number
@@ -343,20 +357,19 @@ type TGetShaderCfg = {
   opacity: number
 }
 
-export const getColormapFromStr = (colormapstr: string): EnumColorMapName => {
-  if (EnumColorMapName[colormapstr]) {
-    return EnumColorMapName[colormapstr]
+export const parseColorMapFromStr = (colormapstr: string): ColorMapName => {
+  if (COLOR_MAP_CONST[colormapstr]) {
+    return COLOR_MAP_CONST[colormapstr]
   }
-  const foundKey = Object.keys(EnumColorMapName).find(key => EnumColorMapName[key] === colormapstr)
-  if (foundKey) {
-    return EnumColorMapName[foundKey]
+  if (cmNameGuard(colormapstr)){
+    return colormapstr
   }
-  return EnumColorMapName.GREYSCALE
+  return COLOR_MAP_CONST.GREYSCALE
 }
 
-export const getShader = (cfg: TGetShaderCfg): string => {
+export const encodeShader = (cfg: TGetShaderCfg): string => {
   const {
-    colormap = EnumColorMapName.GREYSCALE,
+    colormap = COLOR_MAP_CONST.GREYSCALE,
     lowThreshold = 0,
     highThreshold = 1,
     brightness = 0,
@@ -367,7 +380,7 @@ export const getShader = (cfg: TGetShaderCfg): string => {
   } = cfg
   const { header, main, premain, override } = mapKeyColorMap.get(colormap) || (() => {
     console.warn(`colormap ${colormap} not found. Using default colormap instead`)
-    return mapKeyColorMap.get(EnumColorMapName.GREYSCALE)
+    return mapKeyColorMap.get(COLOR_MAP_CONST.GREYSCALE)
   })()
   if (!!override) {
     return override({ lowThreshold, highThreshold, brightness, contrast, removeBg, hideZero, opacity })
@@ -390,6 +403,14 @@ void main() {
   ${ removeBg ? '}' : '' }
 }
 `
+}
+
+export const decodeShader = (shader: string): TGetShaderCfg => {
+  const foundShaderCode = shader.split('\n').find(line => line.includes(cmEncodingVersion))
+  if (!foundShaderCode) {
+    return null
+  }
+  return decodeState(foundShaderCode.replace('// ', ''))
 }
 
 export const cmEncodingVersion = 'encodedCmState-0.1'
@@ -425,11 +446,6 @@ export function encodeState(cfg: TGetShaderCfg): string {
     removeBg
   } = cfg
 
-  /**
-   * encode Enum as key of Enum
-   */
-  const cmstring = Object.keys(EnumColorMapName).find(v => EnumColorMapName[v] === colormap)
-
   const array = new Float32Array([
     brightness,
     contrast,
@@ -440,7 +456,7 @@ export function encodeState(cfg: TGetShaderCfg): string {
   ])
   
   const encodedVal = window.btoa(new Uint8Array(array.buffer).reduce((data, v) => data + String.fromCharCode(v), ''))
-  return `${cmEncodingVersion}:${cmstring}:${encodedVal}`
+  return `${cmEncodingVersion}:${colormap}:${encodedVal}`
 }
 
 export function decodeState(encodedState: string): TGetShaderCfg {
@@ -475,6 +491,6 @@ export function decodeState(encodedState: string): TGetShaderCfg {
     /**
      * since enum is encoded as key of enum, just access it
      */
-    colormap: getColormapFromStr(cmstring) || EnumColorMapName.GREYSCALE
+    colormap: parseColorMapFromStr(cmstring) || COLOR_MAP_CONST.GREYSCALE
   }
 }
