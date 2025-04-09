@@ -37,6 +37,25 @@ type PartialNgSegLayer = {
   }
 }
 
+export async function getLayerType(spec: TGetLayer): Promise<string> {
+  const {
+    viewerObj,
+    layerName,
+    viewerVariableName
+  } = spec
+  
+  const viewer = (viewerObj || (window as any)[ viewerVariableName || 'viewer'])
+  
+  const layerObj = await retry(async () => {
+    const layerObj = viewer.layerManager.getLayerByName(layerName)
+    if (!layerObj) {
+      throw new Error(`layer with name ${layerName} not yet defined.`)
+    }
+    return layerObj
+  }, { retries: 100, timeout: 160 })
+  return layerObj.initialSpecification?.type || 'image'
+}
+
 async function getLayer(spec: TGetLayer) {
   const {
     viewerObj,
@@ -47,6 +66,14 @@ async function getLayer(spec: TGetLayer) {
   const viewer = (viewerObj || (window as any)[ viewerVariableName || 'viewer'])
 
   try {
+    await retry(async () => {
+      const layerObj = viewer.layerManager.getLayerByName(layerName)
+      if (!layerObj) {
+        throw new Error(`layer with name ${layerName} not yet defined.`)
+      }
+    }, { retries: 100, timeout: 160 })
+    
+    // nifti volumes sometimes takes a while to load
     const { layerObj, warning } = await retry(async () => {
       const layerObj = viewer.layerManager.getLayerByName(layerName)
       if (!layerObj) throw new Error(`layer obj ${layerName} not found!`)
@@ -68,7 +95,9 @@ async function getLayer(spec: TGetLayer) {
         return { layerObj }
       }
       throw new Error(`fragmentMain not yet defined!`)
-    }, { retries: 100, timeout: 160 })
+
+      // 10 minutes should be enough... right?
+    }, { retries: 1200, timeout: 500 })
 
     return { layerObj, warning }
   } catch (e) {
@@ -134,7 +163,7 @@ export class IntraFrameNglayerConnector implements NgLayerInterface {
     if (!url) {
       throw new Error(`Cannot find url`)
     }
-    return url.replace(/^precomputed:\/\//, '')
+    return url.replace(/^[a-z-_]+:\/\//, '')
   }
 }
 

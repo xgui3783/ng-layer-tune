@@ -1,7 +1,7 @@
 import { Component, Host, h, Prop, Watch, EventEmitter, Event, State, Method } from '@stencil/core';
 import { encodeShader, parseColorMapFromStr, PRECISION, PRECISION_MUL, colorMapNames, COLOR_MAP_CONST, decodeShader } from '../../utils/colormaps';
 import { clamp, getDebouce, isNullish } from '../../utils/utils';
-import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec, IntraFrameSegLayerConnector, isSegmentConnector } from "./ng-layer-connector"
+import { IFrameNgLayerConnector, IntraFrameNglayerConnector, NgLayerInterface, NgLayerSpec, IntraFrameSegLayerConnector, isSegmentConnector, getLayerType } from "./ng-layer-connector"
 
 export type TErrorEvent = {
   message: string
@@ -168,32 +168,43 @@ export class NgLayerTune {
   @State()
   error: string = null
 
+  @State()
+  coupled: boolean = false
+
   private colorMapNames: string[] = colorMapNames
 
   private async coupleLayer(){
-    if (!this.ngLayerName) return
+    this.coupled = false
+    if (!this.ngLayerName) {
+      return
+    }
     try {
-      if (!this.useIframeCtrl) {
-        this.connector = new IntraFrameNglayerConnector(this.ngLayerName, this.viewerVariableName)
-        await this.connector.init() 
-      } else {
-        if (!this.iframeLayerSpec) return
+      if (this.useIframeCtrl) {
+        if (!this.iframeLayerSpec) {
+          return
+        }
         this.connector = new IFrameNgLayerConnector(this.ngLayerName, this.iframeLayerSpec, this.iFrameName)
         await this.connector.init()
         this.connector.setOpacity(this.opacity)
         await this.connector.setShader(this.overrideShader || this.shaderCode)
+      } else {
+        const layerType = await getLayerType({
+          viewerVariableName: this.viewerVariableName,
+          layerName: this.ngLayerName
+        })
+        if (layerType === "segmentation") {
+          this.connector = new IntraFrameSegLayerConnector(this.ngLayerName, this.viewerVariableName)
+          await this.connector.init() 
+        } else {
+          this.connector = new IntraFrameNglayerConnector(this.ngLayerName, this.viewerVariableName)
+          await this.connector.init() 
+        }
       }
     } catch (e) {
-      try {
-        this.connector = new IntraFrameSegLayerConnector(this.ngLayerName, this.viewerVariableName)
-        await this.connector.init() 
-      } catch (err2) {
-        
-        this.error = err2.toString()
-        console.error(err2)
-      }
+      this.error = e.toString()
+      console.error(e)
     }
-    
+
     try {
       const shader = await this.connector.getShader()
       const decodedShader = decodeShader(shader)
@@ -259,6 +270,12 @@ export class NgLayerTune {
         this.hoverValue = label
       })
     }
+    this.coupled = true
+  }
+
+  retry(){
+    this.error = null
+    this.coupleLayer()
   }
 
   @Watch('ngLayerName')
@@ -292,7 +309,17 @@ export class NgLayerTune {
     if (this.error) {
       return (
         <Host>
-          Cannot couple to layer. Did you try to couple to a segmentation layer?
+          <span>
+            Cannot couple to layer: layer not found.
+          </span>
+          <button onClick={() => this.retry()}>try again</button>
+        </Host>
+      )
+    }
+    if (!this.coupled) {
+      return (
+        <Host>
+          Loading ...
         </Host>
       )
     }
