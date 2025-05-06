@@ -25,6 +25,8 @@ export const COLOR_MAP_CONST = {
 
   RGB: 'rgb (3 channel)',
   RGBA: 'rgba (4 channel)',
+
+  HASH: 'hash',
 } as const
 
 export const colorMapNames = Object.values(COLOR_MAP_CONST)
@@ -342,6 +344,33 @@ emitRGBA(vec4(r, g, b, a) * exp(${contrast.toFixed(10)}));
 ${ removeBg ? '}' : '' }
 }`
     }
+  } ],
+
+  [ COLOR_MAP_CONST.HASH, {
+    header: '',
+    /**
+     * Inspiration from https://github.com/google/neuroglancer/blob/47710c7cf1e0cfa22a6c69d004dd875e9d2d09b1/src/neuroglancer/gpu_hash/shader.ts
+     * apache-2.0
+     */
+    premain: `
+vec3 random_hash(float t){
+  uint value = uint(t);
+  
+  value *= 0xcc9e2d51u;
+  value = (value << 15u) | (value >> 17u);
+  value *= 0x1b873593u;
+  
+  vec3 rgb;
+  rgb[0] = float(value &0xFFu) / 255.0;
+  value >>= 8u;
+  rgb[1] = float(value &0xFFu) / 255.0;
+  value >>= 8u;
+  rgb[2] = float(value &0xFFu) / 255.0;
+  value >>= 8u;
+  return rgb;
+}`,
+    main: `rgb=random_hash(x * 65535.);`,
+    
   } ]
 ])
 
