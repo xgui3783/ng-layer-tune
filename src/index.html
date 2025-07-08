@@ -66,6 +66,7 @@
   const _url = `https://neuroglancer.humanbrainproject.org/precomputed/WHS_SD_rat/templates/v1.01/t2star_masked`
   const url = `https://neuroglancer.humanbrainproject.eu/precomputed/WHS_SD_rat/templates/v1.01/t2star_masked`
   const segmentation = "https://neuroglancer.humanbrainproject.eu/precomputed/data-repo-ng-bot/20210616-julichbrain-v2.9.0-complete-mpm/precomputed/GapMapPublicMPMAtlas_l_N10_nlin2StdColin27_29_publicDOI_7f7bae194464eb71431c9916614d5f89"
+  const rgb = "https://zam12230.jsc.fz-juelich.de/gpuvm-deploy/PE-2021-00981-H/BF/*::pipelines/blockface.json"
   const darkTheme = true
   const { scale } = { scale: 0.1 }
   const backgrd = darkTheme
@@ -105,59 +106,59 @@
       "initialNgState": {
         "showDefaultAnnotations": false,
         "layers": {
-          'colin': {
-            source: `precomputed://https://neuroglancer.humanbrainproject.eu/precomputed/JuBrain/v2.2c/colin27_seg`,
-            type: 'image',
-            transform: [[1,0,0,-75500000],[0,1,0,-111500000],[0,0,1,-67500000],[0,0,0,1]]
-          },
+          // 'colin': {
+          //   source: `precomputed://https://neuroglancer.humanbrainproject.eu/precomputed/JuBrain/v2.2c/colin27_seg`,
+          //   type: 'image',
+          //   transform: [[1,0,0,-75500000],[0,1,0,-111500000],[0,0,1,-67500000],[0,0,0,1]]
+          // },
           [layerId]: {
-            source: `precomputed://${url}`,
+            source: `precomputed://${rgb}`,
             type: "image",
-            transform: [[1,0,0,-9550781],[0,1,0,-24355468],[0,0,1,-9707031],[0,0,0,1]]
+            // transform: [[1,0,0,-9550781],[0,1,0,-24355468],[0,0,1,-9707031],[0,0,0,1]]
           },
-          [layerIdSeg]: {
-            source: `precomputed://${segmentation}`,
-            type: 'segmentation',
-            transform: [[1.0, 0.0, 0.0, -128500000.0], [0.0, 1.0, 0.0, -148500000.0], [0.0, 0.0, 1.0, -110500000.0], [0.0, 0.0, 0.0, 1.0]]
-          }
+          // [layerIdSeg]: {
+          //   source: `precomputed://${segmentation}`,
+          //   type: 'segmentation',
+          //   transform: [[1.0, 0.0, 0.0, -128500000.0], [0.0, 1.0, 0.0, -148500000.0], [0.0, 0.0, 1.0, -110500000.0], [0.0, 0.0, 0.0, 1.0]]
+          // }
         },
-        "navigation": {
-          "zoomFactor": 350000 * scale,
-        },
-        "perspectiveOrientation": [
-          0.3140767216682434,
-          -0.7418519854545593,
-          0.4988985061645508,
-          -0.3195493221282959
-        ],
-        "perspectiveZoom": 1922235.5293810747 * scale
+        // "navigation": {
+        //   "zoomFactor": 350000 * scale,
+        // },
+        // "perspectiveOrientation": [
+        //   0.3140767216682434,
+        //   -0.7418519854545593,
+        //   0.4988985061645508,
+        //   -0.3195493221282959
+        // ],
+        // "perspectiveZoom": 1922235.5293810747 * scale
       }
     },
     "layout": {
-      "useNehubaPerspective": {
-        "perspectiveSlicesBackground": backgrd,
-        "removePerspectiveSlicesBackground": rmPsp,
-        "perspectiveBackground": backgrd,
-        "fixedZoomPerspectiveSlices": {
-          "sliceViewportWidth": 300,
-          "sliceViewportHeight": 300,
-          "sliceZoom": 563818.3562426177 * scale,
-          "sliceViewportSizeMultiplier": 2
-        },
-        "mesh": {
-          "backFaceColor": backgrd,
-          "removeBasedOnNavigation": true,
-          "flipRemovedOctant": true,
-          surfaceParcellation: false
-        },
-        "centerToOrigin": true,
-        "drawSubstrates": drawSubstrates,
-        "drawZoomLevels": drawZoomLevels,
-        "restrictZoomLevel": {
-          "minZoom": 1200000 * scale,
-          "maxZoom": 3500000 * scale
-        }
-      }
+      // "useNehubaPerspective": {
+      //   "perspectiveSlicesBackground": backgrd,
+      //   "removePerspectiveSlicesBackground": rmPsp,
+      //   "perspectiveBackground": backgrd,
+      //   "fixedZoomPerspectiveSlices": {
+      //     "sliceViewportWidth": 300,
+      //     "sliceViewportHeight": 300,
+      //     "sliceZoom": 563818.3562426177 * scale,
+      //     "sliceViewportSizeMultiplier": 1
+      //   },
+      //   "mesh": {
+      //     "backFaceColor": backgrd,
+      //     "removeBasedOnNavigation": true,
+      //     "flipRemovedOctant": true,
+      //     surfaceParcellation: false
+      //   },
+      //   "centerToOrigin": true,
+      //   "drawSubstrates": drawSubstrates,
+      //   "drawZoomLevels": drawZoomLevels,
+      //   "restrictZoomLevel": {
+      //     "minZoom": 1200000 * scale,
+      //     "maxZoom": 3500000 * scale
+      //   }
+      // }
     }
   }
   

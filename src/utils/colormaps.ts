@@ -319,7 +319,7 @@ const mapKeyColorMap = new Map<ColorMapName, IColorMap>([
       const getChan = (variable: string, idx: number) => `float ${variable} = ( toNormalized(getDataValue( ${idx} )) - ${_lowThreshold.toFixed(10)} ) / ( ${ highThreshold - _lowThreshold } ) ${ brightness > 0 ? '+' : '-' } ${Math.abs(brightness).toFixed(10)};`
       return `// ${encodeState({...cfg, colormap: COLOR_MAP_CONST.RGB})}
 void main() { ${getChan('r', 0)} ${getChan('g', 1)} ${getChan('b', 2)}
-${ removeBg ? 'if (r < 0.01 && g < 0.01 && b < 0.01 ) { emitTransparent(); } else {' : '' }
+${ removeBg ? 'float prod = r * g * b; if (prod < 0.1 || prod > 0.9 ) { emitTransparent(); } else {' : '' }
 emitRGB(vec3(r, g, b) * exp(${contrast.toFixed(10)}));
 ${ removeBg ? '}' : '' }
 }`
